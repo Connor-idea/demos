@@ -3,856 +3,748 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智聘助手 — AI Agent 设计案例 | Connor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>JD Copilot — AI 智能 JD 生成 | Connor</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #080808; --bg-card: #0f0f0f; --bg-code: #0a0a0a;
+      --bg: #080808; --bg-card: #0f0f0f; --bg-input: #0a0a0a;
       --text: #e0e0e0; --text-dim: #888; --text-muted: #555;
-      --accent: #c9a96e; --accent-dim: rgba(201,169,110,0.1); --accent-glow: rgba(201,169,110,0.05);
+      --accent: #c9a96e; --accent-dim: rgba(201,169,110,0.1);
       --border: #1a1a1a; --border-light: #222;
-      --think: #7c9fd4; --act: #c9a96e; --observe: #6bc77b;
+      --think: #7c9fd4; --observe: #6bc77b;
       --success: #4ade80; --warning: #fbbf24; --error: #f87171;
       --serif: "Noto Serif SC", "Georgia", serif;
-      --mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
+      --mono: "JetBrains Mono", "SF Mono", monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { font-family: var(--serif); background: var(--bg); color: var(--text); line-height: 1.9; font-size: 15px; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(201,169,110,0.02) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(124,159,212,0.015) 0%, transparent 50%); pointer-events: none; z-index: 0; }
-
-    /* Layout */
-    .container { max-width: 860px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
-    section { padding: 64px 0; }
+    body { font-family: var(--serif); background: var(--bg); color: var(--text); line-height: 1.8; font-size: 15px; }
+    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(201,169,110,0.02) 0%, transparent 50%); pointer-events: none; }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    section { padding: 48px 0; }
     section + section { border-top: 1px solid var(--border); }
-
-    /* Typography */
-    h1 { font-size: 36px; font-weight: 300; letter-spacing: 0.12em; line-height: 1.4; }
-    h2 { font-size: 22px; font-weight: 400; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 24px; }
-    h3 { font-size: 16px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 12px; }
-    h4 { font-size: 14px; font-weight: 600; color: var(--text-dim); margin-bottom: 8px; }
-    p { margin-bottom: 16px; }
-    .dim { color: var(--text-dim); }
-    .muted { color: var(--text-muted); }
-    .accent { color: var(--accent); }
-    .mono { font-family: var(--mono); font-size: 13px; }
+    h1 { font-size: 32px; font-weight: 300; letter-spacing: 0.12em; line-height: 1.4; }
+    h2 { font-size: 20px; font-weight: 400; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 20px; }
+    h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    h4 { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+    p { margin-bottom: 12px; }
+    .dim { color: var(--text-dim); } .accent { color: var(--accent); } .mono { font-family: var(--mono); font-size: 13px; }
     strong { font-weight: 600; }
     em { font-style: normal; color: var(--accent); }
 
     /* Nav */
-    nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; padding: 12px 0; }
+    nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; padding: 10px 0; }
     nav .container { display: flex; justify-content: space-between; align-items: center; }
-    .nav-logo { font-size: 14px; letter-spacing: 0.15em; color: var(--accent); }
-    .nav-links { display: flex; gap: 24px; }
-    .nav-links a { font-size: 12px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
+    .nav-logo { font-size: 13px; letter-spacing: 0.15em; color: var(--accent); }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-size: 11px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
     .nav-links a:hover { color: var(--accent); }
-    body { padding-top: 48px; }
+    body { padding-top: 44px; }
 
     /* Hero */
-    .hero { padding: 100px 0 80px; text-align: center; }
-    .hero-label { font-size: 11px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
-    .hero h1 { margin-bottom: 20px; }
-    .hero h1 span { color: var(--accent); }
-    .hero-sub { font-size: 15px; color: var(--text-dim); max-width: 560px; margin: 0 auto 32px; }
-    .hero-meta { display: flex; justify-content: center; gap: 32px; font-size: 12px; color: var(--text-muted); }
-    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+    .hero { padding: 64px 0 48px; text-align: center; }
+    .hero-label { font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { margin-bottom: 16px; } .hero h1 span { color: var(--accent); }
+    .hero-sub { font-size: 14px; color: var(--text-dim); max-width: 520px; margin: 0 auto 24px; }
+    .hero-meta { display: flex; justify-content: center; gap: 24px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
 
     /* Cards */
-    .card { background: var(--bg-card); border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; margin-bottom: 12px; }
     .card-accent { border-left: 3px solid var(--accent); }
 
     /* Grid */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
     /* Table */
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
-    th { text-align: left; padding: 10px 12px; background: var(--bg-card); color: var(--text-dim); font-weight: 400; border-bottom: 1px solid var(--border); font-size: 12px; letter-spacing: 0.03em; }
-    td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-    tr:hover td { background: rgba(201,169,110,0.02); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
+    th { text-align: left; padding: 8px 10px; background: var(--bg-card); color: var(--text-dim); font-weight: 400; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
     .highlight-row td { background: var(--accent-dim); }
 
     /* Tags */
-    .tag { display: inline-block; padding: 3px 10px; font-size: 11px; margin: 2px 4px 2px 0; border: 1px solid var(--border); }
+    .tag { display: inline-block; padding: 2px 8px; font-size: 10px; margin: 2px 3px 2px 0; border: 1px solid var(--border); }
     .tag-accent { color: var(--accent); border-color: rgba(201,169,110,0.3); background: var(--accent-dim); }
     .tag-success { color: var(--success); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.08); }
-    .tag-warning { color: var(--warning); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); }
-
-    /* Code block */
-    .code-block { background: var(--bg-code); border: 1px solid var(--border); padding: 16px; font-family: var(--mono); font-size: 12px; line-height: 1.8; overflow-x: auto; margin-bottom: 16px; white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
-    .code-block .comment { color: #4a4a4a; }
-    .code-block .key { color: var(--think); }
-    .code-block .string { color: var(--observe); }
-    .code-block .important { color: var(--accent); }
-
-    /* Metrics */
-    .metric { text-align: center; padding: 20px; }
-    .metric-value { font-size: 36px; font-weight: 300; color: var(--accent); line-height: 1; }
-    .metric-label { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
-    .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Flow diagram */
-    .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
-    .flow-node { padding: 8px 16px; border: 1px solid var(--border); font-size: 12px; background: var(--bg-card); }
-    .flow-arrow { color: var(--text-muted); font-size: 14px; }
-    .flow-node.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
-    /* Quote */
-    .quote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 16px 0; font-style: italic; color: var(--text-dim); background: var(--accent-dim); font-size: 14px; }
-
-    /* Demo Section */
-    .demo-section { background: var(--bg-card); border: 1px solid var(--border); padding: 24px; }
-    textarea { width: 100%; height: 120px; background: var(--bg); border: 1px solid var(--border); padding: 12px; color: var(--text); font-size: 13px; font-family: var(--mono); resize: vertical; line-height: 1.6; }
-    textarea:focus { outline: none; border-color: var(--accent); }
-    textarea::placeholder { color: #333; }
-    .btn { padding: 10px 24px; border: none; font-size: 13px; letter-spacing: 0.1em; cursor: pointer; font-family: var(--serif); transition: all 0.3s; }
-    .btn-primary { background: var(--accent); color: var(--bg); }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* Trace */
-    .step-card { background: var(--bg); border: 1px solid var(--border); margin-bottom: 8px; overflow: hidden; animation: fadeIn 0.4s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    .step-row { padding: 8px 14px; display: flex; align-items: center; gap: 10px; }
-    .step-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 50%; flex-shrink: 0; }
-    .step-icon.think { background: rgba(124,159,212,0.15); color: var(--think); }
-    .step-icon.observe { background: rgba(107,199,123,0.15); color: var(--observe); }
-    .step-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-    .step-label.think { color: var(--think); }
-    .step-label.observe { color: var(--observe); }
-    .step-tool { font-size: 11px; color: var(--text-dim); margin-left: auto; font-family: var(--mono); }
-    .step-body { padding: 8px 14px 10px 48px; font-size: 12px; line-height: 1.7; }
-    .step-body.think { color: var(--text-dim); border-left: 2px solid var(--think); margin-left: 14px; padding-left: 14px; }
-    .step-body.observe { border-left: 2px solid var(--observe); margin-left: 14px; padding-left: 14px; font-family: var(--mono); font-size: 11px; }
-    .step-body pre { white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
-    .step-loading { padding: 6px 14px 6px 48px; }
-    .step-loading .dots { display: inline-flex; gap: 4px; }
-    .step-loading .dots span { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; animation: pulse 1.4s infinite; }
-    .step-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
-    .step-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
-
-    /* Report */
-    .report-card { background: var(--bg); border: 1px solid var(--accent); margin-top: 16px; display: none; }
-    .report-card.active { display: block; animation: fadeIn 0.5s ease; }
-    .report-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .report-body { padding: 18px; }
-    .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-    .score-item { background: var(--bg-card); padding: 10px; border: 1px solid var(--border); text-align: center; }
-    .score-label { font-size: 10px; color: var(--text-dim); }
-    .score-value { font-size: 22px; font-weight: 300; color: var(--accent); }
-    .score-bar { height: 2px; background: var(--border); margin-top: 6px; }
-    .score-bar-fill { height: 100%; background: var(--accent); transition: width 0.6s; }
 
     /* Section number */
-    .section-num { font-size: 11px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .section-num { font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
 
-    /* TOC */
-    .toc { display: flex; gap: 16px; flex-wrap: wrap; margin: 24px 0; }
-    .toc a { font-size: 12px; color: var(--text-dim); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); transition: all 0.3s; }
-    .toc a:hover { border-color: var(--accent); color: var(--accent); }
+    /* Chat */
+    .chat-container { background: var(--bg-card); border: 1px solid var(--border); min-height: 400px; display: flex; flex-direction: column; }
+    .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .chat-header h3 { margin: 0; font-size: 13px; color: var(--accent); }
+    .chat-status { font-size: 10px; color: var(--success); }
+    .chat-messages { flex: 1; padding: 16px; overflow-y: auto; max-height: 500px; }
+    .msg { margin-bottom: 12px; display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .msg-avatar.ai { background: var(--accent-dim); color: var(--accent); }
+    .msg-avatar.user { background: rgba(124,159,212,0.15); color: var(--think); }
+    .msg-content { font-size: 13px; line-height: 1.7; }
+    .msg-content p { margin-bottom: 6px; }
+    .msg-content .source { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .chat-input { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .chat-input input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); padding: 8px 12px; color: var(--text); font-size: 13px; font-family: var(--serif); }
+    .chat-input input:focus { outline: none; border-color: var(--accent); }
+    .chat-input button { padding: 8px 16px; background: var(--accent); color: var(--bg); border: none; font-size: 12px; cursor: pointer; font-family: var(--serif); letter-spacing: 0.05em; }
+    .chat-input button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Quick buttons */
+    .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .quick-btn { padding: 4px 10px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 11px; cursor: pointer; font-family: var(--serif); transition: all 0.3s; }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Output panels */
+    .output-panel { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; margin-top: 16px; display: none; }
+    .output-panel.active { display: block; animation: fadeIn 0.4s ease; }
+    .output-panel h4 { color: var(--accent); margin-bottom: 10px; }
+    .output-panel pre { font-family: var(--mono); font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
+
+    /* Metrics */
+    .metric { text-align: center; padding: 16px; }
+    .metric-value { font-size: 28px; font-weight: 300; color: var(--accent); line-height: 1; }
+    .metric-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+    /* Quote */
+    .quote { border-left: 3px solid var(--accent); padding: 10px 16px; margin: 12px 0; font-size: 13px; color: var(--text-dim); background: var(--accent-dim); }
 
     /* Footer */
-    footer { padding: 40px 0; border-top: 1px solid var(--border); }
-    footer p { font-size: 12px; color: var(--text-muted); text-align: center; }
+    footer { padding: 32px 0; border-top: 1px solid var(--border); }
+    footer p { font-size: 11px; color: var(--text-muted); text-align: center; }
 
-    @media(max-width:640px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .score-grid { grid-template-columns: 1fr 1fr; }
-      .hero-meta { flex-direction: column; align-items: center; gap: 8px; }
-      .nav-links { display: none; }
-      h1 { font-size: 26px; }
-    }
+    @media(max-width:640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .nav-links { display: none; } h1 { font-size: 24px; } }
   </style>
 </head>
 <body>
 
-<!-- Nav -->
 <nav>
   <div class="container">
     <div class="nav-logo">CONNOR · AI PM</div>
     <div class="nav-links">
-      <a href="#why">问题</a>
-      <a href="#how-model">选型</a>
-      <a href="#how-arch">架构</a>
-      <a href="#how-prompt">提示词</a>
-      <a href="#how-quality">质量</a>
-      <a href="#how-cost">成本</a>
+      <a href="#problem">问题</a>
+      <a href="#solution">方案</a>
       <a href="#demo">Demo</a>
+      <a href="#architecture">架构</a>
+      <a href="#evaluation">评估</a>
+      <a href="#cost">成本</a>
     </div>
   </div>
 </nav>
 
 <div class="container">
 
-<!-- ═══════════════════════════════════════════ -->
 <!-- HERO -->
-<!-- ═══════════════════════════════════════════ -->
 <section class="hero">
-  <div class="hero-label">AI Agent 设计案例</div>
-  <h1><span>智聘助手</span> — 从 0 到 1<br>构建可度量的 AI Agent</h1>
-  <p class="hero-sub">一个 AI 产品经理如何用 Skill Card 定义行为边界、用 Eval 体系量化质量标准、用 Token 经济学约束产品设计</p>
+  <div class="hero-label">AI Agent 设计案例 · 求职作品</div>
+  <h1><span>JD Copilot</span> — AI 智能<br>岗位需求分析与 JD 生成</h1>
+  <p class="hero-sub">帮 HR 从"我要一个前端工程师"出发，通过 AI 对话搞清楚用人部门的真实需求，生成一份靠谱的 JD。</p>
   <div class="hero-meta">
-    <span>🎯 目标用户：HR 总监 / 招聘负责人</span>
-    <span>🛠 技术栈：DeepSeek V4 Pro · ReAct · Edge Runtime</span>
-    <span>⏱ 阅读时间：8 分钟</span>
-  </div>
-  <div class="toc" style="justify-content:center;margin-top:32px">
-    <a href="#why">WHY · 为什么做</a>
-    <a href="#how-model">HOW · 模型选型</a>
-    <a href="#how-arch">HOW · 架构设计</a>
-    <a href="#how-prompt">HOW · 提示词</a>
-    <a href="#how-quality">HOW · 质量监控</a>
-    <a href="#how-cost">HOW · 成本分析</a>
-    <a href="#demo">DEMO · 实际体验</a>
+    <span>📊 数据来源：SHRM Q3 2025 CHRO Outlook</span>
+    <span>🛠 技术栈：Plan-and-Solve + Reflection</span>
+    <span>🎯 目标用户：招聘经理 / HRBP</span>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- 1. WHY -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="why">
+<!-- PROBLEM -->
+<section id="problem">
   <div class="section-num">01 · WHY</div>
-  <h2>为什么做这个项目？</h2>
+  <h2>为什么不是"简历筛选"，而是"JD 生成"？</h2>
+
+  <div class="quote">
+    "用人部门说'我要一个前端工程师'，没有具体标准，没有 JD，只有职位名称。HR 只能自己去搜同行 JD，拼凑出一份'最严苛标准'的 JD。这份 JD 可能和真实需求差很远。" — HR 从业者深度访谈
+  </div>
 
   <div class="card card-accent">
-    <h3>问题假设（JTBD 框架）</h3>
-    <p class="dim" style="font-size:13px;margin-bottom:16px">以下基于与 3 位 HR 从业者的非正式访谈 + LinkedIn 2024 中国招聘趋势报告。这是定性假设，不是定量调研。</p>
-
-    <div style="margin-bottom:16px">
-      <h4>Job Story 1 — 招聘经理</h4>
-      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当我在 ATS 里看到 50 份新简历时，我想在 30 秒内判断哪些值得安排电话面试，这样我不会在不符合硬性条件的简历上浪费时间。"</p>
-    </div>
-    <div style="margin-bottom:16px">
-      <h4>Job Story 2 — HRBP</h4>
-      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当业务部门催我要候选人时，我想快速从简历池中筛选出 Top 5，这样我能及时响应业务需求。"</p>
-    </div>
-    <div style="margin-bottom:16px">
-      <h4>Job Story 3 — HR 总监</h4>
-      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当我要汇报招聘进展时，我想看到量化的筛选数据（通过率、拒绝原因分布），这样我能发现招聘漏斗的瓶颈。"</p>
-    </div>
+    <h3>核心洞察：JD 是招聘漏斗的源头</h3>
+    <p style="font-size:13px">JD 不对 → 筛选标准不对 → 来的人不对 → 面试被否 → 招来了也留不住。解决 JD 问题，是在源头减少整个链路的浪费。</p>
   </div>
 
-  <div class="grid-2">
-    <div class="card">
-      <h4>这个产品做什么</h4>
-      <p style="font-size:13px">将非结构化简历/JD 转为结构化评估报告，辅助 HR 做初筛决策。<strong>AI 做信息处理，人做最终判断。</strong></p>
-      <p style="font-size:13px">具体输出：匹配度评分（0-100）+ 优势/差距分析 + 推荐级别 + 置信度</p>
-    </div>
-    <div class="card">
-      <h4>这个产品不做什么</h4>
-      <p style="font-size:13px">✗ 不做最终录用决策</p>
-      <p style="font-size:13px">✗ 不判断文化匹配度、软技能</p>
-      <p style="font-size:13px">✗ 不替代电话初筛</p>
-      <p style="font-size:13px">✗ 不处理候选人隐私信息（性别/年龄/民族）</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>已知局限（诚实声明）</h3>
-    <p style="font-size:13px">• 初筛只是 HR 痛点的第 6 位（前面是招不到人、候选人放鸽子、需求不清等）— 这个产品不解决最大的痛点</p>
-    <p style="font-size:13px">• AI 只能处理硬性条件匹配（学历/年限/技能），无法判断项目含金量和文化匹配</p>
-    <p style="font-size:13px">• 依赖简历文本质量 — 格式异常或信息不足的简历准确率会大幅下降</p>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 2. HOW - Model Selection -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="how-model">
-  <div class="section-num">02 · HOW — 模型选型</div>
-  <h2>为什么选择 DeepSeek V4 Pro？</h2>
-
-  <p>模型选型是 Agent 产品的第一个关键决策。我的评估维度：<em>速度、成本、质量、可用性</em>。</p>
-
-  <table>
-    <tr><th>模型</th><th>速度</th><th>单次成本</th><th>中文质量</th><th>JSON 遵循</th><th>综合评价</th></tr>
-    <tr><td>GPT-4o</td><td>~3s</td><td>$0.005</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>贵，备选</td></tr>
-    <tr><td>Claude 3.5 Sonnet</td><td>~4s</td><td>$0.003</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>贵，质量好</td></tr>
-    <tr class="highlight-row"><td><strong>DeepSeek V4 Pro</strong></td><td>~8s</td><td>$0.0005</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td><strong>✅ 选中</strong></td></tr>
-    <tr><td>Llama 3.3 70B</td><td>~17s</td><td>免费</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td><td>太慢，放弃</td></tr>
-    <tr><td>Llama 3.1 8B</td><td>~0.6s</td><td>免费</td><td>⭐⭐</td><td>⭐⭐</td><td>太快但质量不够</td></tr>
-  </table>
-
-  <div class="grid-2">
-    <div class="card">
-      <h4>✅ 选择 DeepSeek V4 Pro 的理由</h4>
-      <p style="font-size:13px">• <strong>中文理解最佳</strong>：简历/JD 是中文场景，DeepSeek 的中文语料最丰富</p>
-      <p style="font-size:13px">• <strong>性价比极高</strong>：单次分析 ~$0.001（约 ¥0.007），1000 次分析不到 ¥7</p>
-      <p style="font-size:13px">• <strong>JSON 遵循度好</strong>：结构化输出是 Agent 的核心需求</p>
-      <p style="font-size:13px">• <strong>NVIDIA NIM 托管</strong>：免运维，API 兼容 OpenAI 格式</p>
-    </div>
-    <div class="card">
-      <h4>⚠️ 已知限制与应对</h4>
-      <p style="font-size:13px">• <strong>冷启动慢</strong>（10-30s）→ SSE 流式架构，前端不阻塞</p>
-      <p style="font-size:13px">• <strong>长文本偶发格式漂移</strong> → 严格 System Prompt + JSON 提取兜底</p>
-      <p style="font-size:13px">• <strong>无 Function Calling</strong> → 用提示词模拟工具调用（ReAct 范式）</p>
-      <p style="font-size:13px">• <strong>推理链偶发幻觉</strong> → Eval 体系持续监控</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 3. HOW - Architecture -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="how-arch">
-  <div class="section-num">03 · HOW — 架构设计</div>
-  <h2>ReAct + Tool-Based 架构</h2>
-
-  <p>借鉴 <em>Hello-Agents</em> 教程的「万物皆为工具」理念，将单次大 prompt 拆解为 <em>5 个独立工具</em>的有序调用，Agent 通过 ReAct 循环（Think → Act → Observe）驱动整个分析流程。</p>
-
-  <h3>Agent 执行流程</h3>
-  <div class="flow">
-    <div class="flow-node active">📥 输入</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node">💭 Think</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node active">🔧 resume_parser</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node">👁 Observe</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node">💭 Think</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node active">🔧 jd_analyzer</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node">👁 Observe</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node active">🔧 skill_matcher</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node active">🔧 experience_evaluator</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node active">📋 report_generator</div>
-    <span class="flow-arrow">→</span>
-    <div class="flow-node">📤 输出</div>
-  </div>
-
-  <h3>为什么用 ReAct 而不是单次调用？</h3>
-  <div class="grid-2">
-    <div class="card">
-      <h4>❌ 单次调用的问题</h4>
-      <p style="font-size:13px">• 一个巨大的 prompt 塞所有指令，模型容易「顾此失彼」</p>
-      <p style="font-size:13px">• 中间过程不可见，出错无法定位</p>
-      <p style="font-size:13px">• 无法对每个步骤独立优化</p>
-      <p style="font-size:13px">• Token 浪费严重（每次传全部上下文）</p>
-    </div>
-    <div class="card">
-      <h4>✅ ReAct 的优势</h4>
-      <p style="font-size:13px">• 每步只关注一个子任务，<strong>准确率更高</strong></p>
-      <p style="font-size:13px">• 全链路可追踪，<strong>问题可定位</strong></p>
-      <p style="font-size:13px">• 每个工具可独立测试和迭代</p>
-      <p style="font-size:13px">• 用户看到思考过程，<strong>信任度更高</strong></p>
-    </div>
-  </div>
-
-  <h3>条件分支与错误恢复（真实 ReAct）</h3>
-  <div class="card">
-    <p style="font-size:13px;margin-bottom:12px">Agent 不是固定流水线。每一步的 Observe 结果会影响下一步的决策：</p>
-    <div class="code-block" style="font-size:11px"><span class="comment">// Step 1: 解析简历</span>
-resume_result = resume_parser(resume)
-
-<span class="key">if</span> resume_result.error:
-    → 返回错误，终止分析（<span class="string">不继续浪费 token</span>）
-
-<span class="key">if</span> 缺失字段 >= 2（姓名/年限/技能）:
-    → 降低置信度，继续分析但标记 warning
-
-<span class="comment">// Step 4: 经验评估（条件跳过）</span>
-<span class="key">if</span> JD 是初级岗位 且 候选人经验 >= 2年:
-    → 跳过 experience_evaluator（<span class="string">节省 1 次 API 调用</span>）
-    → 直接使用默认高分
-
-<span class="comment">// Step 5: 报告生成（置信度驱动 HITL）</span>
-<span class="key">if</span> confidence < 0.6:
-    → recommendation = "需人工判断"（<span class="string">不输出推荐，转人工</span>）
-<span class="key">elif</span> confidence < 0.7:
-    → recommendation = "待定" + 标记 "HR 审核确认"
-<span class="key">else</span>:
-    → recommendation = "推荐/不推荐"</div>
-  </div>
-
-  <h3>五个工具的职责定义</h3>
-  <table>
-    <tr><th>工具</th><th>输入</th><th>输出</th><th>设计意图</th></tr>
-    <tr><td><code>resume_parser</code></td><td>原始简历文本</td><td>结构化 JSON（姓名/经验/技能/学历）</td><td>信息提取，降低后续步骤的噪声</td></tr>
-    <tr><td><code>jd_analyzer</code></td><td>原始 JD 文本</td><td>硬性要求 / 软性要求 / 加分项</td><td>将模糊描述转为可对比的结构</td></tr>
-    <tr><td><code>skill_matcher</code></td><td>解析后的技能 + 要求</td><td>匹配率 / 差距分析</td><td>逐项对比，量化技能匹配度</td></tr>
-    <tr><td><code>experience_evaluator</code></td><td>解析后的经验 + 要求</td><td>年限/行业/岗位匹配分</td><td>评估隐性匹配维度</td></tr>
-    <tr><td><code>report_generator</code></td><td>所有中间结果</td><td>最终评估报告</td><td>汇总并给出推荐建议</td></tr>
-  </table>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 4. HOW - Prompt Engineering -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="how-prompt">
-  <div class="section-num">04 · HOW — 提示词工程</div>
-  <h2>提示词设计：从 System Prompt 到 Tool Prompt</h2>
-
-  <p>提示词是 Agent 产品的「行为规范」。我采用三层结构：<em>System Prompt（角色定义）→ Tool Prompt（工具指令）→ Output Schema（输出约束）</em>。</p>
-
-  <h3>System Prompt（角色定义层）</h3>
-  <div class="code-block"><span class="comment">// 核心设计原则：角色 + 行为规则 + 边界 + 输出格式</span>
-你是「智聘助手」，一个基于 ReAct 范式的 HR 智能招聘 Agent。
-
-<span class="key">## 你的工作方式</span>
-你通过 Think → Act → Observe 循环来完成任务。每一步：
-1. <span class="important">Think</span>: 分析当前状态，决定下一步行动
-2. <span class="important">Act</span>: 调用一个工具获取信息
-3. <span class="important">Observe</span>: 审视工具返回的结果
-
-<span class="key">## 行为准则</span>
-- 对缺失信息标记为 null，<span class="string">绝不编造</span>
-- 分数范围 0-100，置信度 0-1
-- 每次只调用一个工具
-
-<span class="key">## 绝对不能做</span>
-- 不能编造简历中没有的信息
-- 不能做出最终录用决策（只提供建议）</div>
-
-  <h3>Tool Prompt（工具指令层）示例</h3>
-  <div class="code-block"><span class="comment">// resume_parser 的 Tool Prompt</span>
-从以下简历中提取结构化信息，只输出 JSON：
-
-<span class="string">{resume_text}</span>
-
-输出格式：
-{
-  <span class="key">"name"</span>: "姓名 | null",
-  <span class="key">"experience_years"</span>: 数字 | null,
-  <span class="key">"skills"</span>: ["技能1", "技能2"],
-  <span class="key">"education"</span>: "学历 | null",
-  <span class="key">"highlights"</span>: ["亮点1", "亮点2"]
-}
-
-<span class="comment">// 设计要点：</span>
-<span class="comment">// 1. 明确输入（简历文本）和输出（JSON Schema）</span>
-<span class="comment">// 2. 用 | null 标记可选字段，引导模型不编造</span>
-<span class="comment">// 3. "只输出 JSON" 减少格式漂移</span></div>
-
-  <h3>提示词迭代记录</h3>
-  <table>
-    <tr><th>版本</th><th>问题</th><th>修改</th><th>效果</th></tr>
-    <tr><td>v1</td><td>模型输出多余解释文字</td><td>添加"只输出 JSON"</td><td>JSON 解析成功率 60%→90%</td></tr>
-    <tr><td>v2</td><td>缺失字段被编造</td><td>添加"标记 null，不编造"</td><td>幻觉率降低 40%</td></tr>
-    <tr><td>v3</td><td>评分范围不一致</td><td>明确"0-100 整数"</td><td>评分分布标准化</td></tr>
-    <tr><td>v4</td><td>推荐建议格式混乱</td><td>限制为 5 个枚举值</td><td>推荐一致性 95%</td></tr>
-  </table>
-
-  <h3>JSON 兜底策略（6 层解析）</h3>
-  <div class="card">
-    <p style="font-size:13px;margin-bottom:8px">DeepSeek V4 Pro 偶尔输出非标准 JSON（含注释、尾逗号等）。采用 6 层递进兜底：</p>
-    <div class="code-block" style="font-size:11px"><span class="comment">// Strategy 1: 直接解析</span>
-JSON.parse(raw)  <span class="comment">// 成功率 ~85%</span>
-
-<span class="comment">// Strategy 2: 提取 ```json 代码块</span>
-raw.match(/```json\s*([\s\S]*?)\s*```/)
-
-<span class="comment">// Strategy 3: 提取花括号内容</span>
-raw.match(/\{[\s\S]*\}/)
-
-<span class="comment">// Strategy 4: 清理后重试（移除注释、尾逗号）</span>
-raw.replace(/\/\/.*$/gm, '').replace(/,\s*([}\]])/g, '$1')
-
-<span class="comment">// Strategy 5: Key-Value 提取（最后手段）</span>
-/<span class="string">"(\w+)"</span>\s*:\s*(?:"([^"]*)"|(\d+)|(\[[^\]]*\])|(null))/g
-
-<span class="comment">// Strategy 6: 返回 null + raw（完全失败）</span></div>
-  </div>
-
-  <h3>Temperature 实验</h3>
-  <div class="card">
-    <table>
-      <tr><th>Temperature</th><th>JSON 成功率</th><th>分数稳定性</th><th>结论</th></tr>
-      <tr><td>0.0</td><td>100%</td><td>完全一致（无区分度）</td><td>太死板</td></tr>
-      <tr class="highlight-row"><td><strong>0.2</strong></td><td><strong>95%</strong></td><td>72-83（合理波动）</td><td><strong>✅ 选中</strong></td></tr>
-      <tr><td>0.5</td><td>80%</td><td>65-85（波动大）</td><td>不稳定</td></tr>
-      <tr><td>0.7+</td><td>60%</td><td>不可预测</td><td>❌ 不可用</td></tr>
-    </table>
-    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">结论：temperature=0.2 是平衡点。剩余 5% 失败由 JSON 兜底策略覆盖。</p>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 5. HOW - Quality Monitoring -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="how-quality">
-  <div class="section-num">05 · HOW — 质量监控</div>
-  <h2>Eval 体系：如何度量 Agent 质量？</h2>
-
-  <p>Agent 不是写完就完了。<em>没有 Eval 的 Agent 就是没有测试的代码</em>。我构建了三层评估体系：</p>
-
-  <div class="grid-3" style="margin:24px 0">
-    <div class="card" style="text-align:center">
-      <div style="font-size:20px;margin-bottom:8px">🧪</div>
-      <h4>Layer 1: Golden Examples</h4>
-      <p class="dim" style="font-size:12px">预设标准案例，验证基础功能是否正确。每次部署前必跑。</p>
-    </div>
-    <div class="card" style="text-align:center">
-      <div style="font-size:20px;margin-bottom:8px">📊</div>
-      <h4>Layer 2: Quality Bar</h4>
-      <p class="dim" style="font-size:12px">定义质量底线：准确率 ≥80%、推荐匹配率 ≥75%、JSON 解析率 ≥90%</p>
-    </div>
-    <div class="card" style="text-align:center">
-      <div style="font-size:20px;margin-bottom:8px">🔄</div>
-      <h4>Layer 3: 持续监控</h4>
-      <p class="dim" style="font-size:12px">线上分析结果回流，定期抽检，发现退化及时告警</p>
-    </div>
-  </div>
-
-  <h3>Golden Examples 设计（10 个样本，4 类场景）</h3>
-  <table>
-    <tr><th>类别</th><th>场景</th><th>预期分数</th><th>预期推荐</th></tr>
-    <tr><td><span class="tag tag-success">A</span> 高匹配</td><td>8年大厂 vs 首席架构师</td><td>60-90</td><td>推荐</td></tr>
-    <tr><td><span class="tag tag-success">A</span> 高匹配</td><td>6年产品总监 vs 产品总监</td><td>65-90</td><td>推荐</td></tr>
-    <tr><td><span class="tag tag-accent">B</span> 中匹配</td><td>3年前端 vs 5年高级前端</td><td>35-65</td><td>待定</td></tr>
-    <tr><td><span class="tag tag-accent">B</span> 中匹配</td><td>4年数据分析 vs 数据科学家</td><td>30-60</td><td>待定</td></tr>
-    <tr><td><span class="tag tag-warning">C</span> 低匹配</td><td>2年运营 vs 高级产品经理</td><td>10-40</td><td>不推荐</td></tr>
-    <tr><td><span class="tag tag-warning">C</span> 低匹配</td><td>应届生 vs 资深后端</td><td>5-30</td><td>不推荐</td></tr>
-    <tr><td><span class="tag">D</span> 边界</td><td>销售转行产品经理</td><td>20-55</td><td>待定</td></tr>
-    <tr><td><span class="tag">D</span> 边界</td><td>传统IT转云计算</td><td>30-60</td><td>待定</td></tr>
-    <tr><td><span class="tag">E</span> 异常</td><td>空简历 + 有 JD</td><td>0</td><td>信息不足</td></tr>
-    <tr><td><span class="tag">E</span> 异常</td><td>有简历 + 空 JD</td><td>0</td><td>信息不足</td></tr>
-  </table>
-
-  <div class="card">
-    <h4>Eval 执行方式</h4>
-    <p style="font-size:13px">点击页面上的「运行 Eval」按钮，系统自动：</p>
-    <p style="font-size:13px">1. 将 Golden Examples 发送给 Agent</p>
-    <p style="font-size:13px">2. 获取 Agent 的分析结果</p>
-    <p style="font-size:13px">3. 对比预期分数区间，计算准确率</p>
-    <p style="font-size:13px">4. 输出评估报告（通过/未通过）</p>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 6. HOW - Token Economics -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="how-cost">
-  <div class="section-num">06 · HOW — 成本分析</div>
-  <h2>Token 经济学：全生命周期成本</h2>
-
-  <p>Token 成本只是冰山一角。<em>真正的成本 = 直接成本 + 隐性成本 + 机会成本</em>。</p>
-
-  <h3>一、直接成本（可量化）</h3>
-  <table>
-    <tr><th>步骤</th><th>输入 Token</th><th>输出 Token</th><th>说明</th></tr>
-    <tr><td>resume_parser</td><td>~300</td><td>~200</td><td>简历解析</td></tr>
-    <tr><td>jd_analyzer</td><td>~250</td><td>~200</td><td>JD 分析</td></tr>
-    <tr><td>skill_matcher</td><td>~400</td><td>~150</td><td>技能匹配</td></tr>
-    <tr><td>experience_evaluator</td><td>~350</td><td>~150</td><td>经验评估（可跳过）</td></tr>
-    <tr style="background:var(--accent-dim)"><td><strong>合计</strong></td><td><strong>~1300</strong></td><td><strong>~700</strong></td><td><strong>~2000 tokens/次</strong></td></tr>
-  </table>
-
-  <div class="grid-2" style="margin-top:12px">
-    <div class="card">
-      <h4>💰 API 调用成本</h4>
-      <p style="font-size:13px">DeepSeek V4 Pro: $0.27/M 输入 + $1.10/M 输出</p>
-      <p style="font-size:13px">单次分析：~<em>$0.0012</em> ≈ ¥0.009</p>
-      <p style="font-size:13px">日均 100 次：<strong>¥0.9/天</strong></p>
-      <p style="font-size:13px">月均 2200 次：<strong>¥20/月</strong></p>
-    </div>
-    <div class="card">
-      <h4>🏗 基础设施成本</h4>
-      <p style="font-size:13px">Vercel Pro: $20/月 ≈ ¥145</p>
-      <p style="font-size:13px">域名: ¥60/年 ≈ ¥5/月</p>
-      <p style="font-size:13px">合计基础设施：<strong>¥150/月</strong></p>
-      <p style="font-size:13px">总直接成本：<strong>¥170/月</strong></p>
-    </div>
-  </div>
-
-  <h3>二、隐性成本（需估算）</h3>
-  <div class="card">
-    <table>
-      <tr><th>成本项</th><th>估算</th><th>说明</th></tr>
-      <tr><td>误判成本（假阴性）</td><td>难以量化</td><td>AI 漏筛优秀候选人的机会成本。假设 5% 漏筛率，每月可能错过 2-3 个合格候选人</td></tr>
-      <tr><td>信任建立成本</td><td>~2-4 周</td><td>HR 初期不信任 AI，会人工复核所有结果。前 2 周效率提升 ≈ 0</td></tr>
-      <tr><td>维护成本</td><td>~4h/月</td><td>提示词调优 2h + Eval 更新 1h + 问题排查 1h</td></tr>
-      <tr><td>合规成本</td><td>一次性</td><td>隐私政策制定、偏见审计、法律咨询（首次上线前）</td></tr>
-    </table>
-  </div>
-
-  <h3>三、正确的价值对比</h3>
-  <div class="card card-accent">
-    <p style="font-size:13px;margin-bottom:12px"><strong>不是 "AI vs 人工"，而是 "AI 辅助人工 vs 纯人工"</strong></p>
-    <div class="grid-2">
-      <div>
-        <h4>纯人工初筛</h4>
-        <p style="font-size:13px">3 分钟/份 × 100 份/天 = <em>300 分钟（5 小时）</em></p>
-      </div>
-      <div>
-        <h4>AI 辅助初筛</h4>
-        <p style="font-size:13px">推荐（~30%）：30 份 × 30 秒确认 = 15 分钟</p>
-        <p style="font-size:13px">待定（~20%）：20 份 × 2 分钟审核 = 40 分钟</p>
-        <p style="font-size:13px">不推荐（~50%）：抽检 10 份 × 1 分钟 = 10 分钟</p>
-        <p style="font-size:13px">合计：<em>65 分钟</em>（效率提升 <strong>4.6×</strong>）</p>
-      </div>
-    </div>
-    <p style="font-size:12px;color:var(--text-muted);margin-top:12px">⚠️ 前提条件：准确率 ≥ 85%。低于此阈值 HR 不会信任 AI，会全量人工复核。</p>
-  </div>
-
-  <h3>四、优化策略</h3>
-  <div class="grid-2">
-    <div class="card">
-      <h4>📉 已实施的优化</h4>
-      <p style="font-size:13px">1. <strong>条件跳过</strong>：简单 JD 跳过 experience_evaluator，节省 1 次调用</p>
-      <p style="font-size:13px">2. <strong>Temperature 0.2</strong>：减少随机性，降低重试率</p>
-      <p style="font-size:13px">3. <strong>JSON 兜底</strong>：6 层解析策略，避免格式失败导致整次调用浪费</p>
-    </div>
-    <div class="card">
-      <h4>📉 计划中的优化</h4>
-      <p style="font-size:13px">1. <strong>缓存</strong>：相同简历+JD 缓存结果（24h 有效）</p>
-      <p style="font-size:13px">2. <strong>批量合并</strong>：多份简历合并为 1 次 LLM 调用</p>
-      <p style="font-size:13px">3. <strong>模型降级</strong>：简单场景用 8B 模型，复杂场景用 V4 Pro</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 7. DEMO -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="demo">
-  <div class="section-num">07 · DEMO</div>
-  <h2>实际体验</h2>
-  <p>下面是可交互的 Agent Demo。输入简历和 JD，观察 Agent 的完整思考链。</p>
-
-  <div class="demo-section">
-    <div class="grid-2" style="margin-bottom:12px">
-      <div>
-        <h4 style="margin-bottom:6px">候选人简历</h4>
-        <textarea id="resume" placeholder="粘贴简历内容...&#10;示例：张三，5 年产品经理经验，曾在字节跳动负责抖音电商产品线。擅长数据分析和用户增长。浙大计算机本科。"></textarea>
-      </div>
-      <div>
-        <h4 style="margin-bottom:6px">岗位描述 (JD)</h4>
-        <textarea id="jd" placeholder="粘贴岗位 JD...&#10;示例：高级产品经理，3年以上电商经验，AI 产品设计能力，数据驱动决策"></textarea>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">开 始 分 析</button>
-      <button class="btn btn-primary" id="evalBtn" onclick="runEval()" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">运 行 Eval</button>
-    </div>
-
-    <!-- Trace -->
-    <div id="traceSection" style="display:none;margin-top:20px">
-      <h4 style="margin-bottom:10px;color:var(--accent)">Agent 执行轨迹 <span id="traceMeta" style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:8px"></span></h4>
-      <div id="traceContainer"></div>
-    </div>
-
-    <!-- Report -->
-    <div class="report-card" id="reportCard">
-      <div class="report-header">
-        <h4 style="margin:0;color:var(--accent)">评估报告</h4>
-        <span id="recBadge" style="padding:4px 12px;font-size:13px"></span>
-      </div>
-      <div class="report-body" id="reportBody"></div>
-    </div>
-
-    <!-- Eval -->
-    <div id="evalSection" style="display:none;margin-top:20px"></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- 8. RESULT -->
-<!-- ═══════════════════════════════════════════ -->
-<section id="result">
-  <div class="section-num">08 · RESULT</div>
-  <h2>结果、反思与下一步</h2>
-
-  <div class="grid-3" style="margin-bottom:24px">
+  <div class="grid-3" style="margin-top:16px">
     <div class="metric">
-      <div class="metric-value">¥0.009</div>
-      <div class="metric-label">单次 API 成本</div>
-      <div class="metric-sub">DeepSeek V4 Pro</div>
+      <div class="metric-value">61%</div>
+      <div class="metric-label">招聘专业人士面临人才短缺挑战</div>
+      <div style="font-size:10px;color:var(--text-muted)">SHRM Q3 2025</div>
     </div>
     <div class="metric">
-      <div class="metric-value">4.6×</div>
-      <div class="metric-label">效率提升（理论值）</div>
-      <div class="metric-sub">前提：准确率 ≥ 85%</div>
+      <div class="metric-value">$4,700</div>
+      <div class="metric-label">招聘一个新员工的平均成本</div>
+      <div style="font-size:10px;color:var(--text-muted)">SHRM 2022</div>
     </div>
     <div class="metric">
-      <div class="metric-value">10</div>
-      <div class="metric-label">Eval 样本数</div>
-      <div class="metric-sub">4 类场景覆盖</div>
-    </div>
-  </div>
-
-  <h3>合规与风险设计</h3>
-  <div class="grid-2">
-    <div class="card">
-      <h4>🛡 偏见缓解</h4>
-      <p style="font-size:13px">• 输入层：不提取性别、年龄、民族、婚姻状况</p>
-      <p style="font-size:13px">• 模型层：System Prompt 禁止基于敏感属性判断</p>
-      <p style="font-size:13px">• 输出层：不包含性别/年龄相关描述</p>
-      <p style="font-size:13px">• 监控层：定期抽检不同群体的评分分布</p>
-    </div>
-    <div class="card">
-      <h4>🔒 数据隐私</h4>
-      <p style="font-size:13px">• 分析在 Edge Function 完成，不落盘</p>
-      <p style="font-size:13px">• 原始简历文本不存储在服务器</p>
-      <p style="font-size:13px">• 用户关闭页面 → 数据即销毁</p>
-      <p style="font-size:13px">• 日志中 PII 字段脱敏</p>
+      <div class="metric-value">30%</div>
+      <div class="metric-label">错误招聘成本占年薪比例</div>
+      <div style="font-size:10px;color:var(--text-muted)">U.S. DOL</div>
     </div>
   </div>
 
   <div class="card" style="margin-top:16px">
-    <h4>👤 Human-in-the-loop（HITL）机制</h4>
+    <h3>痛点排序（基于真实 HR 经验）</h3>
     <table>
-      <tr><th>置信度</th><th>AI 行为</th><th>HR 行为</th></tr>
-      <tr><td>≥ 0.7</td><td>自动输出推荐</td><td>可选：快速确认</td></tr>
-      <tr><td>0.6 - 0.7</td><td>输出结果 + 标记"待审核"</td><td>必须：审核确认</td></tr>
-      <tr><td>< 0.6</td><td>只输出结构化信息，不输出推荐</td><td>必须：人工判断</td></tr>
+      <tr><th>排序</th><th>痛点</th><th>AI 可介入度</th></tr>
+      <tr class="highlight-row"><td><span class="tag tag-accent">1</span></td><td>JD 与真实需求不匹配</td><td>⭐⭐⭐⭐</td></tr>
+      <tr><td>2</td><td>招聘平台压榨，好简历被隐藏</td><td>⭐</td></tr>
+      <tr><td>3</td><td>优秀候选人是被动的</td><td>⭐⭐⭐</td></tr>
+      <tr><td>4</td><td>个性化沟通话术 + 时机</td><td>⭐⭐⭐⭐</td></tr>
+      <tr><td>5</td><td>简历筛选效率</td><td>⭐⭐⭐⭐⭐</td></tr>
     </table>
-    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">HR 可覆盖 AI 判断，覆盖原因记录到审计日志，用于后续 Eval 数据集扩充。</p>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:8px">排序来源：HR 从业者深度访谈（非正式）</p>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="section-num">02 · WHAT</div>
+  <h2>产品定义：JD Copilot</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>✅ 做什么</h4>
+      <p style="font-size:13px">• 对话式需求收集（AI 追问 + HR 确认）</p>
+      <p style="font-size:13px">• 结构化需求文档输出</p>
+      <p style="font-size:13px">• JD 草稿生成（行业数据库 + 需求文档）</p>
+      <p style="font-size:13px">• JD 质量评估（覆盖度 + 同行对比）</p>
+    </div>
+    <div class="card">
+      <h4>❌ 不做什么</h4>
+      <p style="font-size:13px">• 不做简历筛选（下游问题）</p>
+      <p style="font-size:13px">• 不做招聘平台对接（渠道问题）</p>
+      <p style="font-size:13px">• 不做候选人沟通（独立场景）</p>
+      <p style="font-size:13px">• 不代替 HR 做最终审核</p>
+    </div>
   </div>
 
-  <h3>验证计划（三阶段）</h3>
+  <div class="card" style="margin-top:12px">
+    <h3>Skill Card 六维框架</h3>
+    <table>
+      <tr><th>维度</th><th>定义</th></tr>
+      <tr><td><span class="tag tag-accent">Intent</span></td><td>帮 HR 从模糊需求出发，系统性收集真实需求，生成结构化 JD</td></tr>
+      <tr><td><span class="tag tag-accent">Trigger</span></td><td>HR 输入新岗位需求 / 用人部门提出招聘需求</td></tr>
+      <tr><td><span class="tag tag-accent">Boundary</span></td><td>不编造未提及的要求；不代替 HR 做决策；标注"待确认"项</td></tr>
+      <tr><td><span class="tag tag-accent">Quality Bar</span></td><td>需求覆盖度 ≥ 80%、JD 准确度 ≥ 70%、幻觉率 ≤ 10%</td></tr>
+      <tr><td><span class="tag tag-accent">Golden Examples</span></td><td>10 个标准案例覆盖 4 类场景（标准/复合/模糊/异常）</td></tr>
+      <tr><td><span class="tag tag-accent">Integration</span></td><td>输入：模糊需求文本；输出：需求文档 + JD 草稿 + 质量报告</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="section-num">03 · DEMO</div>
+  <h2>实际体验：JD Copilot</h2>
+  <p style="font-size:13px;color:var(--text-dim)">输入一个模糊的岗位需求，观察 AI 如何通过对话收集信息并生成 JD。</p>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h3>JD Copilot · Plan-and-Solve + Reflection</h3>
+      <span class="chat-status">● 就绪</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+          <p>你好！我是 JD Copilot，帮你把模糊的岗位需求变成靠谱的 JD。</p>
+          <p>请告诉我：<strong>你需要招聘什么岗位？</strong>可以只说一个职位名称，比如"前端工程师"或"产品经理"。</p>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="输入岗位需求，如：前端工程师" />
+      <button id="sendBtn" onclick="sendMessage()">发送</button>
+    </div>
+  </div>
+
+  <div class="quick-btns" id="quickBtns">
+    <button class="quick-btn" onclick="quickSend('前端工程师')">前端工程师</button>
+    <button class="quick-btn" onclick="quickSend('产品经理')">产品经理</button>
+    <button class="quick-btn" onclick="quickSend('数据分析师')">数据分析师</button>
+    <button class="quick-btn" onclick="quickSend('我要一个厉害的人')">模糊需求</button>
+  </div>
+
+  <!-- Requirement Doc Output -->
+  <div class="output-panel" id="reqDocPanel">
+    <h4>📋 结构化需求文档</h4>
+    <pre id="reqDocContent"></pre>
+  </div>
+
+  <!-- JD Output -->
+  <div class="output-panel" id="jdPanel">
+    <h4>📄 JD 草稿</h4>
+    <div id="jdContent" style="font-size:13px;line-height:1.8;"></div>
+  </div>
+
+  <!-- Quality Report -->
+  <div class="output-panel" id="qualityPanel">
+    <h4>📊 质量评估报告</h4>
+    <div id="qualityContent"></div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-num">04 · HOW</div>
+  <h2>技术架构</h2>
+
   <div class="card">
-    <p style="font-size:13px;margin-bottom:8px"><strong>Phase 1: 脱敏数据测试</strong>（当前阶段）</p>
-    <p style="font-size:13px">用 20 份公开脱敏简历测试，对比 AI 与人工判断的一致率。分析不一致 case 的原因。</p>
-    <p style="font-size:13px;margin-top:12px;margin-bottom:8px"><strong>Phase 2: A/B 测试</strong>（需要 HR 参与）</p>
-    <p style="font-size:13px">同一批简历，分别用 AI 辅助和纯人工筛选。对比效率、准确率、HR 满意度。</p>
-    <p style="font-size:13px;margin-top:12px;margin-bottom:8px"><strong>Phase 3: 持续监控</strong>（上线后）</p>
-    <p style="font-size:13px">每周统计推荐候选人后续表现，计算实际录用率，发现退化自动告警。</p>
+    <h3>范式选型：为什么是 Plan-and-Solve + Reflection？</h3>
+    <table>
+      <tr><th>范式</th><th>适用性</th><th>理由</th></tr>
+      <tr><td>ReAct</td><td>⭐⭐</td><td>JD 生成不需要外部工具调用</td></tr>
+      <tr class="highlight-row"><td><strong>Plan-and-Solve</strong></td><td>⭐⭐⭐⭐</td><td>先收集需求再生成 JD，典型的"先规划后执行"</td></tr>
+      <tr class="highlight-row"><td><strong>Reflection</strong></td><td>⭐⭐⭐⭐⭐</td><td>JD 质量要求高，需要自校验防止幻觉</td></tr>
+    </table>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:8px">范式选择依据：Hello-Agents Chapter 4 — 智能体经典范式构建</p>
   </div>
 
-  <h3>做对了什么</h3>
+  <div class="grid-2" style="margin-top:12px">
+    <div class="card">
+      <h3>Agent 执行流程</h3>
+      <p style="font-size:12px;font-family:var(--mono);line-height:2">
+        Phase 1 — <span style="color:var(--think)">Plan</span>（需求收集）<br>
+        &nbsp;&nbsp;AI 对话引导 HR 收集需求<br>
+        &nbsp;&nbsp;输出：结构化需求文档<br><br>
+        Phase 2 — <span style="color:var(--accent)">Solve</span>（JD 生成）<br>
+        &nbsp;&nbsp;基于需求文档 + 行业数据生成 JD<br>
+        &nbsp;&nbsp;输出：JD 草稿<br><br>
+        Phase 3 — <span style="color:var(--observe)">Reflect</span>（质量校验）<br>
+        &nbsp;&nbsp;自检查：是否有未确认的要求？<br>
+        &nbsp;&nbsp;对比同行 JD，标注差异<br>
+        &nbsp;&nbsp;输出：质量评估报告
+      </p>
+    </div>
+    <div class="card">
+      <h3>幻觉防控</h3>
+      <table>
+        <tr><th>风险</th><th>措施</th></tr>
+        <tr><td>编造未提及的要求</td><td>标注来源（"来自对话"或"来自参考"）</td></tr>
+        <tr><td>编造行业数据</td><td>只引用 RAG 检索到的真实 JD</td></tr>
+        <tr><td>格式漂移</td><td>6 层 JSON 兜底 + Few-shot</td></tr>
+        <tr><td>上下文丢失</td><td>关键信息每轮带上 + 外部笔记</td></tr>
+      </table>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">上下文工程：Hello-Agents Chapter 9 — GSSC 流水线</p>
+    </div>
+  </div>
+</section>
+
+<!-- EVALUATION -->
+<section id="evaluation">
+  <div class="section-num">05 · EVAL</div>
+  <h2>评估体系</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>评估指标</h3>
+      <table>
+        <tr><th>指标</th><th>定义</th><th>目标</th></tr>
+        <tr><td>需求覆盖度</td><td>AI 需求文档覆盖真实需求的比例</td><td>≥ 80%</td></tr>
+        <tr><td>JD 准确度</td><td>AI JD 与最终 JD 的匹配度</td><td>≥ 70%</td></tr>
+        <tr><td>幻觉率</td><td>编造未提及要求的比例</td><td>≤ 10%</td></tr>
+        <tr><td>对话效率</td><td>从输入到生成 JD 的轮数</td><td>≤ 8 轮</td></tr>
+        <tr><td>用户满意度</td><td>HR 对 JD 质量的评分</td><td>≥ 4.0/5</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>分层评估策略</h3>
+      <table>
+        <tr><th>层级</th><th>样本数</th><th>触发条件</th></tr>
+        <tr><td>Layer 1 快速</td><td>3</td><td>每次代码提交</td></tr>
+        <tr><td>Layer 2 标准</td><td>10</td><td>每次提示词修改</td></tr>
+        <tr><td>Layer 3 全面</td><td>20+</td><td>每月 / 重大更新</td></tr>
+      </table>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">评估框架：Hello-Agents Chapter 12 — 智能体性能评估</p>
+    </div>
+  </div>
+</section>
+
+<!-- COST -->
+<section id="cost">
+  <div class="section-num">06 · COST</div>
+  <h2>Token 经济学</h2>
+
+  <div class="grid-3">
+    <div class="metric">
+      <div class="metric-value">¥0.035</div>
+      <div class="metric-label">单次 JD 生成成本</div>
+      <div style="font-size:10px;color:var(--text-muted)">~10K tokens · DeepSeek V4 Pro</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">4.6×</div>
+      <div class="metric-label">效率提升（理论值）</div>
+      <div style="font-size:10px;color:var(--text-muted)">前提：准确率 ≥ 85%</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">¥14/月</div>
+      <div class="metric-label">月均成本（400 次）</div>
+      <div style="font-size:10px;color:var(--text-muted)">API 调用成本</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>诚实声明</h3>
+    <p style="font-size:13px">• 4.6× 效率提升是理论计算值，需要真实数据验证</p>
+    <p style="font-size:13px">• 单次成本只计算了 API 调用，不含基础设施和维护成本</p>
+    <p style="font-size:13px">• 准确率目标（85%）尚未验证，需要 Phase 0 测试</p>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section id="compliance">
+  <div class="section-num">07 · 合规</div>
+  <h2>合规与风险设计</h2>
+
+  <div class="grid-3">
+    <div class="card">
+      <h4>🛡 偏见缓解</h4>
+      <p style="font-size:12px">• 不提取性别/年龄/民族</p>
+      <p style="font-size:12px">• Prompt 禁止敏感属性判断</p>
+      <p style="font-size:12px">• 定期抽检 JD 中的歧视性语言</p>
+    </div>
+    <div class="card">
+      <h4>🔒 数据隐私</h4>
+      <p style="font-size:12px">• Edge Function 处理，不落盘</p>
+      <p style="font-size:12px">• 用户可请求删除所有数据</p>
+      <p style="font-size:12px">• 日志中 PII 脱敏</p>
+    </div>
+    <div class="card">
+      <h4>👤 HITL 机制</h4>
+      <p style="font-size:12px">• 置信度 ≥ 0.8：自动输出</p>
+      <p style="font-size:12px">• 0.6-0.8：标记"待审核"</p>
+      <p style="font-size:12px">• &lt; 0.6：转人工判断</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT STEPS -->
+<section id="next">
+  <div class="section-num">08 · NEXT</div>
+  <h2>验证计划与优先级</h2>
+
   <div class="card">
-    <p style="font-size:13px">• ReAct 范式让分析过程可解释，用户信任度高</p>
-    <p style="font-size:13px">• Tool-Based 架构方便独立迭代每个分析模块</p>
-    <p style="font-size:13px">• 条置信度分级实现了基本的 HITL 机制</p>
-    <p style="font-size:13px">• JSON 6 层兜底策略保证了输出的健壮性</p>
-    <p style="font-size:13px">• Token 成本意识贯穿设计，单次 ¥0.009 可规模化</p>
+    <h3>四阶段实施计划</h3>
+    <table>
+      <tr><th>阶段</th><th>时间</th><th>目标</th><th>交付物</th></tr>
+      <tr><td><span class="tag tag-accent">Phase 0</span></td><td>第 1 周</td><td>验证假设是否成立</td><td>调研报告 + 5 个 HR 访谈</td></tr>
+      <tr><td><span class="tag tag-accent">Phase 1</span></td><td>第 2-3 周</td><td>构建 MVP</td><td>可部署的 Web 应用</td></tr>
+      <tr><td><span class="tag tag-success">Phase 2</span></td><td>第 4 周</td><td>用户测试</td><td>测试报告 + 迭代计划</td></tr>
+      <tr><td><span class="tag tag-success">Phase 3</span></td><td>第 5 周</td><td>作品包装</td><td>完整案例展示页面</td></tr>
+    </table>
   </div>
 
-  <h3>已知差距（诚实面对）</h3>
-  <div class="card">
-    <p style="font-size:13px">• <strong>Eval 数据集不足</strong>：10 个样本不具备统计意义，需要扩充到 50+</p>
-    <p style="font-size:13px">• <strong>没有真实数据验证</strong>：当前只用虚构简历，需要脱敏真实数据测试</p>
-    <p style="font-size:13px">• <strong>ReAct 实现不完整</strong>：有条件分支但没有动态规划（如根据 JD 复杂度决定步骤数）</p>
-    <p style="font-size:13px">• <strong>没有 ATS 集成</strong>：当前是独立工具，需要集成到现有工作流才有实际价值</p>
-    <p style="font-size:13px">• <strong>偏见检测未实现</strong>：只有设计，没有实际的监控代码</p>
+  <div class="card" style="margin-top:12px">
+    <h3>已知差距（诚实面对）</h3>
+    <p style="font-size:13px">• 需求覆盖度和 JD 准确度尚未经过真实数据验证</p>
+    <p style="font-size:13px">• 当前 Demo 是模拟对话，非真实 Agent 交互</p>
+    <p style="font-size:13px">• 行业 JD 数据库尚未建立</p>
+    <p style="font-size:13px">• 偏见检测只有设计，没有实际监控代码</p>
   </div>
-
-  <h3>优先级排序（P0-P3）</h3>
-  <table>
-    <tr><th>优先级</th><th>改进项</th><th>理由</th></tr>
-    <tr><td><span class="tag tag-accent">P0</span></td><td>Eval 数据集扩充（10→50+）</td><td>没有评估就没有改进依据。所有后续优化都依赖 Eval。</td></tr>
-    <tr><td><span class="tag tag-accent">P0</span></td><td>脱敏真实数据验证</td><td>没有真实数据的验证，和 PPT 没有区别。</td></tr>
-    <tr><td><span class="tag tag-success">P1</span></td><td>准确率优化（提示词迭代）</td><td>准确率从当前水平提升到 85%+，是 HR 信任的门槛。</td></tr>
-    <tr><td><span class="tag tag-success">P1</span></td><td>偏见监控实现</td><td>合规硬约束，上线前必须有。</td></tr>
-    <tr><td><span class="tag tag-warning">P2</span></td><td>ATS 集成（Webhook/API）</td><td>不集成到现有工作流，HR 不会主动用。</td></tr>
-    <tr><td><span class="tag tag-warning">P2</span></td><td>批量处理模式</td><td>效率提升的关键，但前提是有足够准确率。</td></tr>
-  </table>
 </section>
 
 <footer>
-  <p>© 2026 Connor · AI 产品经理 · demos.connor.zone</p>
+  <p>© 2026 Connor · AI 产品经理 · JD Copilot · demos.connor.zone</p>
 </footer>
 
 </div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCRIPT -->
-<!-- ═══════════════════════════════════════════ -->
 <script>
-const TL={resume_parser:'简历解析器',jd_analyzer:'JD 分析器',skill_matcher:'技能匹配器',experience_evaluator:'经验评估器',report_generator:'报告生成器'};
-const PI={think:'💭',observe:'👁'};
-const PL={think:'Think',observe:'Observe'};
+// ═══ JD Copilot Demo — 模拟对话流 ═══
 
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+const FLOWS = {
+  '前端工程师': {
+    questions: [
+      { q: '好的，前端工程师。我需要了解更多信息来生成一份精准的 JD。', follow: '这个岗位主要负责什么项目？是 C 端产品、B 端后台、还是内部工具？' },
+      { q: '明白了。团队现在几个人？这个前端在团队中是什么角色？', follow: '是独立负责前端，还是和现有团队协作？' },
+      { q: '技术栈有要求吗？React、Vue、Angular？', follow: '有没有必须具备的技能？比如 TypeScript、微前端、Node.js？' },
+      { q: '薪资范围大概是多少？这个会影响 JD 中的描述。', follow: '有没有什么绝对不要的特征？比如频繁跳槽、学历要求？' },
+    ],
+    reqDoc: {
+      title: '前端工程师',
+      hard_requirements: ['3年以上前端开发经验', 'React 精通', 'TypeScript 熟练', '本科及以上学历'],
+      soft_requirements: ['有大厂经验优先', '有团队管理经验加分', '有微前端经验加分'],
+      nice_to_have: ['有开源贡献', '有 Node.js 全栈经验', '有性能优化经验'],
+      exclude: ['频繁跳槽（2年内换3份工作）', '无实际项目经验'],
+      salary_range: '25K-40K',
+      source: { hard: '来自对话第1-3轮', soft: '来自对话第2轮', nice: '来自行业参考' }
+    },
+    jd: `<h3>高级前端工程师</h3>
+<p><strong>岗位描述</strong></p>
+<p>我们正在寻找一位经验丰富的高级前端工程师，负责核心产品的前端架构设计和开发工作。你将与产品、设计、后端团队紧密协作，打造高质量的用户体验。</p>
 
-function mkStep(step,phase,content,loading){
-  const c=document.createElement('div');c.className='step-card';c.id=`s-${step}-${phase}`;
-  let h=`<div class="step-row"><div class="step-icon ${phase}">${PI[phase]||'💭'}</div><span class="step-label ${phase}">${PL[phase]||phase}</span><span class="step-tool">${TL[content]||content||''}</span></div>`;
-  if(loading)h+=`<div class="step-loading"><div class="dots"><span></span><span></span><span></span></div></div>`;
-  else if(typeof content==='object')h+=`<div class="step-body observe"><pre>${esc(JSON.stringify(content,null,2))}</pre></div>`;
-  else if(content)h+=`<div class="step-body ${phase}">${esc(String(content))}</div>`;
-  c.innerHTML=h;return c;
-}
+<p><strong>岗位职责</strong></p>
+<ul>
+<li>负责核心产品的前端架构设计和技术选型</li>
+<li>主导前端工程化建设，包括构建工具、CI/CD、代码规范</li>
+<li>解决复杂的技术难题，如性能优化、跨浏览器兼容</li>
+<li>参与产品需求评审，从技术角度提供可行性建议</li>
+<li>指导和培养初级前端工程师</li>
+</ul>
 
-function upStep(step,phase,content){
-  const e=document.getElementById(`s-${step}-${phase}`);if(e)e.remove();
-  document.getElementById('traceContainer').appendChild(mkStep(step,phase,content,false));
-}
+<p><strong>任职要求</strong></p>
+<ul>
+<li>3年以上前端开发经验，精通 React 生态</li>
+<li>熟练使用 TypeScript，有大型项目经验</li>
+<li>熟悉前端工程化工具（Webpack/Vite、ESLint、Jest）</li>
+<li>良好的沟通能力和团队协作精神</li>
+<li>本科及以上学历，计算机相关专业优先</li>
+</ul>
 
-function renderReport(r,meta){
-  if(!r)return;
-  const c=r.candidate||{},m=r.match_result||{},s=m.dimension_scores||{};
-  const cls=(m.recommendation||'').includes('强烈')?'rec-strong':(m.recommendation||'').includes('推荐')?'rec-yes':(m.recommendation||'').includes('待定')?'rec-maybe':'rec-no';
-  const b=document.getElementById('recBadge');b.className=`tag tag-${cls==='rec-strong'?'success':cls==='rec-no'?'warning':'accent'}`;b.textContent=m.recommendation||'-';
-  document.getElementById('reportBody').innerHTML=`
-    <div class="score-grid">
-      <div class="score-item"><div class="score-label">综合</div><div class="score-value">${m.overall_score??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${m.overall_score||0}%"></div></div></div>
-      <div class="score-item"><div class="score-label">经验</div><div class="score-value">${s.experience??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.experience||0}%"></div></div></div>
-      <div class="score-item"><div class="score-label">技能</div><div class="score-value">${s.skills??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.skills||0}%"></div></div></div>
-      <div class="score-item"><div class="score-label">行业</div><div class="score-value">${s.industry??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.industry||0}%"></div></div></div>
-    </div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px">
-      <div><span class="dim">姓名</span> ${c.name||'-'}</div>
-      <div><span class="dim">年限</span> ${c.experience_years??'-'}年</div>
-      <div><span class="dim">学历</span> ${c.education||'-'}</div>
-      <div><span class="dim">置信度</span> ${((r.confidence||0)*100).toFixed(0)}%</div>
-    </div>
-    ${(m.strengths||[]).length?`<div style="margin-bottom:8px"><span class="dim" style="font-size:12px">优势</span><br>${m.strengths.map(s=>`<span class="tag tag-success">${esc(s)}</span>`).join('')}</div>`:''}
-    ${(m.gaps||[]).length?`<div style="margin-bottom:8px"><span class="dim" style="font-size:12px">待提升</span><br>${m.gaps.map(g=>`<span class="tag tag-warning">${esc(g)}</span>`).join('')}</div>`:''}
-    ${r.suggestion?`<div style="margin-top:12px;padding:10px;background:var(--accent-dim);font-size:12px"><strong style="color:var(--accent)">HR 建议：</strong>${esc(r.suggestion)}</div>`:''}
-    ${meta?`<div style="margin-top:12px;font-size:11px;color:var(--text-muted)">模型: ${meta.model||'-'} · 架构: ${meta.agent_pattern||'-'} · 步骤: ${meta.steps||'-'}</div>`:''}`;
-  document.getElementById('reportCard').classList.add('active');
-}
+<p><strong>加分项</strong></p>
+<ul>
+<li>有大厂（字节、阿里、腾讯等）前端开发经验</li>
+<li>有微前端架构实践经验</li>
+<li>有开源项目贡献或技术博客</li>
+<li>有 Node.js 全栈开发经验</li>
+</ul>
 
-async function analyze(){
-  const resume=document.getElementById('resume').value.trim(),jd=document.getElementById('jd').value.trim();
-  if(!resume||!jd){alert('请填写简历和岗位描述');return}
-  const btn=document.getElementById('analyzeBtn'),ts=document.getElementById('traceSection'),tc=document.getElementById('traceContainer'),rc=document.getElementById('reportCard');
-  btn.disabled=true;btn.textContent='分析中...';ts.style.display='block';tc.innerHTML='';rc.classList.remove('active');document.getElementById('traceMeta').textContent='分析中...';
-  try{
-    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume,jobDescription:jd})});
-    const reader=res.body.getReader(),dec=new TextDecoder();let buf='',t0=Date.now();
-    while(true){
-      const{done,value}=await reader.read();if(done)break;
-      buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
-      for(const ln of lines){
-        if(!ln.startsWith('data: '))continue;
-        try{
-          const d=JSON.parse(ln.slice(6));
-          if(d.type==='step'){
-            if(d.phase==='think'){tc.appendChild(mkStep(d.step,'think',d.tool,true));setTimeout(()=>upStep(d.step,'think',d.content),200);}
-            else if(d.phase==='observe')upStep(d.step,'observe',d.content);
-          }else if(d.type==='report')renderReport(d.data,null);
-          else if(d.type==='meta')document.getElementById('traceMeta').textContent=`${d.data.steps||0} 步 · ${d.data.tokens_used||0} tokens · ${((Date.now()-t0)/1000).toFixed(1)}s`;
-          else if(d.type==='error')alert('错误: '+d.message);
-        }catch{}
-      }
+<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
+    quality: { coverage: 85, accuracy: 78, hallucination: 5, confidence: 0.82 }
+  },
+
+  '产品经理': {
+    questions: [
+      { q: '产品经理，了解。这个 PM 主要负责什么方向？C 端、B 端、还是平台型产品？' },
+      { q: '需要技术背景吗？有些岗位要求 PM 能看懂代码。' },
+      { q: '团队规模和汇报关系是怎样的？是独立带产品线还是协助高级 PM？' },
+      { q: '有没有行业要求？比如电商、金融、教育等。' },
+    ],
+    reqDoc: {
+      title: '产品经理',
+      hard_requirements: ['3年以上产品经验', '有完整的项目上线经验', '本科及以上学历'],
+      soft_requirements: ['B 端产品经验优先', '有数据驱动决策能力', '有跨团队协作经验'],
+      nice_to_have: ['技术背景（能看懂代码）', '有 AI 产品经验', '有行业资源'],
+      exclude: ['无独立负责产品经验', '频繁跳槽'],
+      salary_range: '20K-35K',
+      source: { hard: '来自对话第1-3轮', soft: '来自对话第2轮', nice: '来自行业参考' }
+    },
+    jd: `<h3>高级产品经理</h3>
+<p><strong>岗位描述</strong></p>
+<p>我们正在寻找一位资深的产品经理，负责核心产品线的规划、设计和落地。你将从用户需求出发，驱动产品从 0 到 1 和持续迭代。</p>
+
+<p><strong>岗位职责</strong></p>
+<ul>
+<li>负责产品规划和路线图制定，驱动产品从 0 到 1</li>
+<li>深入理解用户需求，输出 PRD、原型和交互设计</li>
+<li>协调研发、设计、运营等跨团队资源，推动项目按时交付</li>
+<li>建立数据指标体系，通过数据驱动产品优化</li>
+<li>跟踪行业趋势和竞品动态，发现新的产品机会</li>
+</ul>
+
+<p><strong>任职要求</strong></p>
+<ul>
+<li>3年以上产品经验，有完整的项目上线经历</li>
+<li>优秀的需求分析和文档输出能力</li>
+<li>熟练使用数据分析工具（SQL、Excel、数据平台）</li>
+<li>良好的沟通能力和跨团队协作能力</li>
+<li>本科及以上学历</li>
+</ul>
+
+<p><strong>加分项</strong></p>
+<ul>
+<li>有 B 端 SaaS 产品经验</li>
+<li>有技术背景，能与研发团队高效沟通</li>
+<li>有 AI 产品设计经验</li>
+</ul>
+
+<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
+    quality: { coverage: 82, accuracy: 75, hallucination: 8, confidence: 0.78 }
+  },
+
+  '数据分析师': {
+    questions: [
+      { q: '数据分析师，好的。这个岗位主要做什么？是做报表、做用户分析、还是做算法模型？' },
+      { q: '技术要求是什么水平？SQL + Excel 就够，还是需要 Python/R？' },
+      { q: '需要有业务理解能力吗？比如能独立提出数据洞察。' },
+    ],
+    reqDoc: {
+      title: '数据分析师',
+      hard_requirements: ['2年以上数据分析经验', 'SQL 熟练', 'Excel/数据可视化工具精通'],
+      soft_requirements: ['Python/R 加分', '有业务理解能力', '有独立分析项目经验'],
+      nice_to_have: ['有机器学习基础', '有行业经验', '有 Tableau/PowerBI 经验'],
+      exclude: ['只会写 SQL 不会分析', '无独立项目经验'],
+      salary_range: '15K-25K',
+      source: { hard: '来自对话第1轮', soft: '来自对话第2-3轮', nice: '来自行业参考' }
+    },
+    jd: `<h3>数据分析师</h3>
+<p><strong>岗位描述</strong></p>
+<p>我们正在寻找一位数据分析师，负责业务数据的采集、分析和洞察，为产品和运营决策提供数据支持。</p>
+
+<p><strong>岗位职责</strong></p>
+<ul>
+<li>负责业务数据的日常监控和异常预警</li>
+<li>深入分析用户行为数据，输出可执行的洞察报告</li>
+<li>搭建数据指标体系和可视化看板</li>
+<li>支持产品和运营团队的数据需求</li>
+<li>参与 A/B 测试设计和效果评估</li>
+</ul>
+
+<p><strong>任职要求</strong></p>
+<ul>
+<li>2年以上数据分析经验</li>
+<li>精通 SQL，熟练使用 Excel 进行数据处理</li>
+<li>熟悉至少一种数据可视化工具（Tableau、PowerBI 等）</li>
+<li>良好的逻辑思维和业务理解能力</li>
+<li>本科及以上学历，统计学、数学、计算机相关专业优先</li>
+</ul>
+
+<p><strong>加分项</strong></p>
+<ul>
+<li>熟练使用 Python 或 R 进行数据分析</li>
+<li>有机器学习基础</li>
+<li>有电商/金融/教育等行业数据分析经验</li>
+</ul>
+
+<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
+    quality: { coverage: 80, accuracy: 72, hallucination: 10, confidence: 0.75 }
+  },
+
+  '我要一个厉害的人': {
+    questions: [
+      { q: '理解，"厉害的人"可以有很多含义。让我帮你拆解一下。' },
+      { q: '这个岗位是什么方向？技术、产品、运营、还是其他？' },
+      { q: '你希望 TA 具备什么核心能力？比如：能独立带项目、有行业资源、技术特别强？' },
+      { q: '有没有具体的行业或领域要求？' },
+    ],
+    reqDoc: {
+      title: '待定（需求模糊）',
+      hard_requirements: ['待确认 — 用人部门需明确岗位方向'],
+      soft_requirements: ['待确认 — 需明确核心能力要求'],
+      nice_to_have: ['待确认'],
+      exclude: ['待确认'],
+      salary_range: '待确认',
+      source: { hard: '⚠️ 用人部门未明确', soft: '⚠️ 用人部门未明确', nice: '⚠️ 用人部门未明确' }
+    },
+    jd: `<h3>⚠️ 需求信息不足</h3>
+<p>当前需求描述过于模糊（"我要一个厉害的人"），无法生成有效的 JD。</p>
+<p><strong>建议：</strong></p>
+<ul>
+<li>请与用人部门确认具体的岗位方向（技术/产品/运营/其他）</li>
+<li>请明确核心能力要求（能独立带项目？有行业资源？技术特别强？）</li>
+<li>请确认薪资范围和汇报关系</li>
+</ul>
+<p>补充以上信息后，我可以为你生成一份精准的 JD。</p>`,
+    quality: { coverage: 30, accuracy: 0, hallucination: 0, confidence: 0.35 }
+  }
+};
+
+let currentFlow = null;
+let currentStep = 0;
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Add user message
+  addMessage('user', text);
+
+  // Find matching flow
+  if (!currentFlow) {
+    const flowKey = Object.keys(FLOWS).find(k => text.includes(k) || k.includes(text));
+    if (flowKey) {
+      currentFlow = FLOWS[flowKey];
+      currentStep = 0;
+      document.getElementById('quickBtns').style.display = 'none';
+      setTimeout(() => askNextQuestion(), 800);
+    } else {
+      // Default: try to match
+      setTimeout(() => {
+        addMessage('ai', '我没有完全理解你的需求。你可以试试选择一个预设岗位，或者更具体地描述，比如"我需要一个有 3 年经验的前端工程师"。');
+      }, 500);
     }
-  }catch(e){alert('失败: '+e.message)}
-  finally{btn.disabled=false;btn.textContent='开 始 分 析'}
+    return;
+  }
 }
 
-async function runEval(){
-  const btn=document.getElementById('evalBtn'),es=document.getElementById('evalSection');
-  btn.disabled=true;btn.textContent='评估中...';es.style.display='block';es.innerHTML='<p class="dim">正在运行 Golden Examples...</p>';
-  try{
-    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'eval'})});
-    const reader=res.body.getReader(),dec=new TextDecoder();let buf='';
-    while(true){
-      const{done,value}=await reader.read();if(done)break;
-      buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
-      for(const ln of lines){
-        if(!ln.startsWith('data: '))continue;
-        try{
-          const d=JSON.parse(ln.slice(6));
-          if(d.type==='eval_result'){
-            let h=`<h4>Eval 结果 · 准确率: ${((d.accuracy||0)*100).toFixed(0)}%</h4><table><tr><th>样本</th><th>分数</th><th>区间检查</th><th>通过</th></tr>`;
-            for(const r of d.results||[])h+=`<tr><td>${r.id}</td><td>${r.score}</td><td>${r.in_range?'✅':'❌'}</td><td>${r.in_range?'✅':'❌'}</td></tr>`;
-            h+='</table>';es.innerHTML=h;
-          }
-        }catch{}
-      }
-    }
-  }catch(e){alert('失败: '+e.message)}
-  finally{btn.disabled=false;btn.textContent='运 行 Eval'}
+function quickSend(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
 }
+
+function askNextQuestion() {
+  if (!currentFlow || currentStep >= currentFlow.questions.length) {
+    // All questions asked, generate output
+    setTimeout(() => generateOutput(), 500);
+    return;
+  }
+
+  const q = currentFlow.questions[currentStep];
+  addMessage('ai', q.q + (q.follow ? '<br><br>' + q.follow : ''));
+  currentStep++;
+
+  // Auto-continue after a delay (simulate user answering)
+  setTimeout(() => {
+    if (currentStep < currentFlow.questions.length) {
+      addMessage('user', '（继续回答...）');
+      setTimeout(() => askNextQuestion(), 600);
+    } else {
+      addMessage('user', '（信息已提供）');
+      setTimeout(() => generateOutput(), 500);
+    }
+  }, 1500);
+}
+
+function generateOutput() {
+  addMessage('ai', '好的，我已经收集了足够的信息。现在为你生成结构化需求文档和 JD 草稿...');
+
+  setTimeout(() => {
+    // Show requirement doc
+    const reqPanel = document.getElementById('reqDocPanel');
+    reqPanel.classList.add('active');
+    const req = currentFlow.reqDoc;
+    document.getElementById('reqDocContent').textContent = JSON.stringify(req, null, 2);
+
+    addMessage('ai', '📋 <strong>结构化需求文档</strong>已生成。请查看下方。');
+
+    setTimeout(() => {
+      // Show JD
+      const jdPanel = document.getElementById('jdPanel');
+      jdPanel.classList.add('active');
+      document.getElementById('jdContent').innerHTML = currentFlow.jd;
+
+      addMessage('ai', '📄 <strong>JD 草稿</strong>已生成。注意：标注"来自行业参考"的部分请与用人部门确认。');
+
+      setTimeout(() => {
+        // Show quality report
+        const qualityPanel = document.getElementById('qualityPanel');
+        qualityPanel.classList.add('active');
+        const q = currentFlow.quality;
+        document.getElementById('qualityContent').innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
+            <div><div style="font-size:20px;color:var(--accent)">${q.coverage}%</div><div style="font-size:10px;color:var(--text-dim)">需求覆盖度</div></div>
+            <div><div style="font-size:20px;color:var(--accent)">${q.accuracy}%</div><div style="font-size:10px;color:var(--text-dim)">JD 准确度</div></div>
+            <div><div style="font-size:20px;color:var(--success)">${q.hallucination}%</div><div style="font-size:10px;color:var(--text-dim)">幻觉率</div></div>
+            <div><div style="font-size:20px;color:var(--think)">${q.confidence}</div><div style="font-size:10px;color:var(--text-dim)">置信度</div></div>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:8px">
+            ${q.confidence >= 0.8 ? '✅ 置信度足够，可直接使用' : q.confidence >= 0.6 ? '⚠️ 建议 HR 审核后使用' : '❌ 需求信息不足，建议补充后重新生成'}
+          </p>
+        `;
+
+        addMessage('ai', '📊 <strong>质量评估报告</strong>：' +
+          (q.confidence >= 0.8 ? '置信度足够，JD 可直接使用。' :
+           q.confidence >= 0.6 ? '建议 HR 审核后使用，部分需求待确认。' :
+           '需求信息不足，建议补充后重新生成。'));
+      }, 800);
+    }, 1000);
+  }, 1000);
+}
+
+function addMessage(role, content) {
+  const container = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'msg';
+  msg.innerHTML = `
+    <div class="msg-avatar ${role}">${role === 'ai' ? 'AI' : 'HR'}</div>
+    <div class="msg-content">${content}</div>
+  `;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Enter key to send
+document.getElementById('chatInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
 </script>
 </body>
 </html>

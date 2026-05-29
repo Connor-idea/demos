@@ -3,117 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JD Copilot — AI 智能 JD 生成 | Connor</title>
+  <title>JD Copilot — AI 智能需求对齐 | Connor · AI PM</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #080808; --bg-card: #0f0f0f; --bg-input: #0a0a0a;
-      --text: #e0e0e0; --text-dim: #888; --text-muted: #555;
-      --accent: #c9a96e; --accent-dim: rgba(201,169,110,0.1);
-      --border: #1a1a1a; --border-light: #222;
-      --think: #7c9fd4; --observe: #6bc77b;
-      --success: #4ade80; --warning: #fbbf24; --error: #f87171;
-      --serif: "Noto Serif SC", "Georgia", serif;
-      --mono: "JetBrains Mono", "SF Mono", monospace;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { font-family: var(--serif); background: var(--bg); color: var(--text); line-height: 1.8; font-size: 15px; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(201,169,110,0.02) 0%, transparent 50%); pointer-events: none; }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-    section { padding: 48px 0; }
-    section + section { border-top: 1px solid var(--border); }
-    h1 { font-size: 32px; font-weight: 300; letter-spacing: 0.12em; line-height: 1.4; }
-    h2 { font-size: 20px; font-weight: 400; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 20px; }
-    h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
-    h4 { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
-    p { margin-bottom: 12px; }
-    .dim { color: var(--text-dim); } .accent { color: var(--accent); } .mono { font-family: var(--mono); font-size: 13px; }
-    strong { font-weight: 600; }
-    em { font-style: normal; color: var(--accent); }
-
-    /* Nav */
-    nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; padding: 10px 0; }
-    nav .container { display: flex; justify-content: space-between; align-items: center; }
-    .nav-logo { font-size: 13px; letter-spacing: 0.15em; color: var(--accent); }
-    .nav-links { display: flex; gap: 20px; }
-    .nav-links a { font-size: 11px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
-    .nav-links a:hover { color: var(--accent); }
-    body { padding-top: 44px; }
-
-    /* Hero */
-    .hero { padding: 64px 0 48px; text-align: center; }
-    .hero-label { font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
-    .hero h1 { margin-bottom: 16px; } .hero h1 span { color: var(--accent); }
-    .hero-sub { font-size: 14px; color: var(--text-dim); max-width: 520px; margin: 0 auto 24px; }
-    .hero-meta { display: flex; justify-content: center; gap: 24px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
-
-    /* Cards */
-    .card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; margin-bottom: 12px; }
-    .card-accent { border-left: 3px solid var(--accent); }
-
-    /* Grid */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-    /* Table */
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
-    th { text-align: left; padding: 8px 10px; background: var(--bg-card); color: var(--text-dim); font-weight: 400; border-bottom: 1px solid var(--border); }
-    td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-    .highlight-row td { background: var(--accent-dim); }
-
-    /* Tags */
-    .tag { display: inline-block; padding: 2px 8px; font-size: 10px; margin: 2px 3px 2px 0; border: 1px solid var(--border); }
-    .tag-accent { color: var(--accent); border-color: rgba(201,169,110,0.3); background: var(--accent-dim); }
-    .tag-success { color: var(--success); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.08); }
-
-    /* Section number */
-    .section-num { font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-
-    /* Chat */
-    .chat-container { background: var(--bg-card); border: 1px solid var(--border); min-height: 400px; display: flex; flex-direction: column; }
-    .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .chat-header h3 { margin: 0; font-size: 13px; color: var(--accent); }
-    .chat-status { font-size: 10px; color: var(--success); }
-    .chat-messages { flex: 1; padding: 16px; overflow-y: auto; max-height: 500px; }
-    .msg { margin-bottom: 12px; display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
-    .msg-avatar.ai { background: var(--accent-dim); color: var(--accent); }
-    .msg-avatar.user { background: rgba(124,159,212,0.15); color: var(--think); }
-    .msg-content { font-size: 13px; line-height: 1.7; }
-    .msg-content p { margin-bottom: 6px; }
-    .msg-content .source { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
-    .chat-input { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-    .chat-input input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); padding: 8px 12px; color: var(--text); font-size: 13px; font-family: var(--serif); }
-    .chat-input input:focus { outline: none; border-color: var(--accent); }
-    .chat-input button { padding: 8px 16px; background: var(--accent); color: var(--bg); border: none; font-size: 12px; cursor: pointer; font-family: var(--serif); letter-spacing: 0.05em; }
-    .chat-input button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* Quick buttons */
-    .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .quick-btn { padding: 4px 10px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 11px; cursor: pointer; font-family: var(--serif); transition: all 0.3s; }
-    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Output panels */
-    .output-panel { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; margin-top: 16px; display: none; }
-    .output-panel.active { display: block; animation: fadeIn 0.4s ease; }
-    .output-panel h4 { color: var(--accent); margin-bottom: 10px; }
-    .output-panel pre { font-family: var(--mono); font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
-
-    /* Metrics */
-    .metric { text-align: center; padding: 16px; }
-    .metric-value { font-size: 28px; font-weight: 300; color: var(--accent); line-height: 1; }
-    .metric-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
-
-    /* Quote */
-    .quote { border-left: 3px solid var(--accent); padding: 10px 16px; margin: 12px 0; font-size: 13px; color: var(--text-dim); background: var(--accent-dim); }
-
-    /* Footer */
-    footer { padding: 32px 0; border-top: 1px solid var(--border); }
-    footer p { font-size: 11px; color: var(--text-muted); text-align: center; }
-
-    @media(max-width:640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .nav-links { display: none; } h1 { font-size: 24px; } }
+    :root{--bg:#080808;--bg-card:#0f0f0f;--bg-input:#0a0a0a;--text:#e0e0e0;--text-dim:#888;--text-muted:#555;--accent:#c9a96e;--accent-dim:rgba(201,169,110,0.1);--border:#1a1a1a;--think:#7c9fd4;--observe:#6bc77b;--success:#4ade80;--warning:#fbbf24;--error:#f87171;--serif:"Noto Serif SC","Georgia",serif;--mono:"JetBrains Mono","SF Mono",monospace}
+    *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+    body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.8;font-size:14px}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(201,169,110,0.02) 0%,transparent 50%);pointer-events:none}
+    .container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+    section{padding:40px 0}section+section{border-top:1px solid var(--border)}
+    h1{font-size:28px;font-weight:300;letter-spacing:0.1em;line-height:1.5}
+    h2{font-size:18px;font-weight:400;letter-spacing:0.06em;color:var(--accent);margin-bottom:16px}
+    h3{font-size:14px;font-weight:600;margin-bottom:8px}
+    h4{font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px}
+    p{margin-bottom:10px}
+    .dim{color:var(--text-dim)}.accent{color:var(--accent)}.mono{font-family:var(--mono);font-size:12px}
+    strong{font-weight:600}em{font-style:normal;color:var(--accent)}
+    nav{position:fixed;top:0;left:0;right:0;background:rgba(8,8,8,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;padding:8px 0}
+    nav .container{display:flex;justify-content:space-between;align-items:center}
+    .nav-logo{font-size:12px;letter-spacing:0.15em;color:var(--accent)}
+    .nav-links{display:flex;gap:16px}.nav-links a{font-size:10px;color:var(--text-dim);text-decoration:none;letter-spacing:0.05em;transition:color 0.3s}.nav-links a:hover{color:var(--accent)}
+    body{padding-top:40px}
+    .hero{padding:48px 0 32px;text-align:center}
+    .hero-label{font-size:9px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px}
+    .hero h1{margin-bottom:12px}.hero h1 span{color:var(--accent)}
+    .hero-sub{font-size:13px;color:var(--text-dim);max-width:480px;margin:0 auto 16px}
+    .hero-meta{display:flex;justify-content:center;gap:16px;font-size:10px;color:var(--text-muted);flex-wrap:wrap}
+    .card{background:var(--bg-card);border:1px solid var(--border);padding:16px;margin-bottom:10px}
+    .card-accent{border-left:3px solid var(--accent)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+    table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+    th{text-align:left;padding:6px 8px;background:var(--bg-card);color:var(--text-dim);font-weight:400;border-bottom:1px solid var(--border)}
+    td{padding:6px 8px;border-bottom:1px solid var(--border)}.highlight-row td{background:var(--accent-dim)}
+    .tag{display:inline-block;padding:2px 7px;font-size:9px;margin:1px 2px;border:1px solid var(--border)}
+    .tag-accent{color:var(--accent);border-color:rgba(201,169,110,0.3);background:var(--accent-dim)}
+    .tag-success{color:var(--success);border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.08)}
+    .tag-muted{color:var(--text-muted);border-color:var(--border)}
+    .section-num{font-size:9px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
+    .metric{text-align:center;padding:12px}.metric-value{font-size:24px;font-weight:300;color:var(--accent);line-height:1}.metric-label{font-size:10px;color:var(--text-dim);margin-top:3px}.metric-sub{font-size:9px;color:var(--text-muted)}
+    .quote{border-left:2px solid var(--accent);padding:8px 12px;margin:10px 0;font-size:12px;color:var(--text-dim);background:var(--accent-dim)}
+    .chat-container{background:var(--bg-card);border:1px solid var(--border);min-height:360px;display:flex;flex-direction:column}
+    .chat-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .chat-header h3{margin:0;font-size:12px;color:var(--accent)}
+    .chat-status{font-size:9px;color:var(--success)}
+    .chat-messages{flex:1;padding:14px;overflow-y:auto;max-height:420px}
+    .msg{margin-bottom:10px;display:flex;gap:8px;animation:fadeIn 0.3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+    .msg-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+    .msg-avatar.ai{background:var(--accent-dim);color:var(--accent)}
+    .msg-avatar.user{background:rgba(124,159,212,0.15);color:var(--think)}
+    .msg-content{font-size:12px;line-height:1.7}
+    .msg-content p{margin-bottom:4px}
+    .chat-input{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:6px}
+    .chat-input input{flex:1;background:var(--bg-input);border:1px solid var(--border);padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--serif)}
+    .chat-input input:focus{outline:none;border-color:var(--accent)}
+    .chat-input button{padding:6px 12px;background:var(--accent);color:var(--bg);border:none;font-size:11px;cursor:pointer;font-family:var(--serif);letter-spacing:0.05em}
+    .chat-input button:disabled{opacity:0.4;cursor:not-allowed}
+    .quick-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+    .quick-btn{padding:3px 8px;background:transparent;border:1px solid var(--border);color:var(--text-dim);font-size:10px;cursor:pointer;font-family:var(--serif);transition:all 0.3s}
+    .quick-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .output-panel{background:var(--bg-card);border:1px solid var(--border);padding:14px;margin-top:12px;display:none}
+    .output-panel.active{display:block;animation:fadeIn 0.4s ease}
+    .output-panel h4{color:var(--accent);margin-bottom:8px}
+    .output-panel pre{font-family:var(--mono);font-size:10px;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:var(--text-dim)}
+    .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}
+    .flow-node{padding:6px 12px;border:1px solid var(--border);font-size:10px;background:var(--bg-card)}
+    .flow-node.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+    .flow-arrow{color:var(--text-muted);font-size:12px}
+    .gap-marker{border:2px dashed var(--accent);padding:8px 12px;text-align:center;font-size:11px;color:var(--accent);background:var(--accent-dim);margin:8px 0}
+    footer{padding:24px 0;border-top:1px solid var(--border)}footer p{font-size:10px;color:var(--text-muted);text-align:center}
+    @media(max-width:640px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.nav-links{display:none}h1{font-size:22px}}
   </style>
 </head>
 <body>
@@ -123,10 +84,11 @@
     <div class="nav-logo">CONNOR · AI PM</div>
     <div class="nav-links">
       <a href="#problem">问题</a>
+      <a href="#market">市场</a>
       <a href="#solution">方案</a>
       <a href="#demo">Demo</a>
-      <a href="#architecture">架构</a>
-      <a href="#evaluation">评估</a>
+      <a href="#arch">架构</a>
+      <a href="#eval">评估</a>
       <a href="#cost">成本</a>
     </div>
   </div>
@@ -137,102 +99,176 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-label">AI Agent 设计案例 · 求职作品</div>
-  <h1><span>JD Copilot</span> — AI 智能<br>岗位需求分析与 JD 生成</h1>
-  <p class="hero-sub">帮 HR 从"我要一个前端工程师"出发，通过 AI 对话搞清楚用人部门的真实需求，生成一份靠谱的 JD。</p>
+  <h1><span>JD Copilot</span> — 用人部门说"我要一个前端"<br>AI 帮你搞清楚 TA 到底要什么</h1>
+  <p class="hero-sub">专注招聘漏斗的第一个信息转换点：把模糊需求转化为结构化岗位要求。小而美，单点极致。</p>
   <div class="hero-meta">
-    <span>📊 数据来源：SHRM Q3 2025 CHRO Outlook</span>
-    <span>🛠 技术栈：Plan-and-Solve + Reflection</span>
-    <span>🎯 目标用户：招聘经理 / HRBP</span>
+    <span>📊 SHRM Q3 2025 CHRO Outlook</span>
+    <span>🛠 Plan-and-Solve + Reflection</span>
+    <span>🎯 招聘经理 / HRBP</span>
   </div>
 </section>
 
 <!-- PROBLEM -->
 <section id="problem">
-  <div class="section-num">01 · WHY</div>
-  <h2>为什么不是"简历筛选"，而是"JD 生成"？</h2>
+  <div class="section-num">01 · 问题发现</div>
+  <h2>为什么不是"简历筛选"，而是"需求对齐"？</h2>
 
   <div class="quote">
     "用人部门说'我要一个前端工程师'，没有具体标准，没有 JD，只有职位名称。HR 只能自己去搜同行 JD，拼凑出一份'最严苛标准'的 JD。这份 JD 可能和真实需求差很远。" — HR 从业者深度访谈
   </div>
 
   <div class="card card-accent">
-    <h3>核心洞察：JD 是招聘漏斗的源头</h3>
-    <p style="font-size:13px">JD 不对 → 筛选标准不对 → 来的人不对 → 面试被否 → 招来了也留不住。解决 JD 问题，是在源头减少整个链路的浪费。</p>
+    <h3>核心洞察：JD 是招聘漏斗的第一个信息转换点</h3>
+    <p style="font-size:12px">JD 不对 → 筛选标准不对 → 来的人不对 → 面试被否 → 招来了也留不住。解决 JD 问题，是在源头减少整个链路的浪费。</p>
   </div>
 
-  <div class="grid-3" style="margin-top:16px">
+  <div class="grid-3" style="margin-top:12px">
     <div class="metric">
       <div class="metric-value">61%</div>
-      <div class="metric-label">招聘专业人士面临人才短缺挑战</div>
-      <div style="font-size:10px;color:var(--text-muted)">SHRM Q3 2025</div>
+      <div class="metric-label">招聘专业人士面临人才短缺</div>
+      <div class="metric-sub">SHRM Q3 2025 CHRO Outlook</div>
     </div>
     <div class="metric">
       <div class="metric-value">$4,700</div>
       <div class="metric-label">招聘一个新员工的平均成本</div>
-      <div style="font-size:10px;color:var(--text-muted)">SHRM 2022</div>
+      <div class="metric-sub">SHRM Benchmarking 2022</div>
     </div>
     <div class="metric">
-      <div class="metric-value">30%</div>
-      <div class="metric-label">错误招聘成本占年薪比例</div>
-      <div style="font-size:10px;color:var(--text-muted)">U.S. DOL</div>
+      <div class="metric-value">33%</div>
+      <div class="metric-label">新员工 6 个月内寻找新工作</div>
+      <div class="metric-sub">BambooHR 2023</div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px">
+  <div class="card" style="margin-top:10px">
     <h3>痛点排序（基于真实 HR 经验）</h3>
     <table>
-      <tr><th>排序</th><th>痛点</th><th>AI 可介入度</th></tr>
-      <tr class="highlight-row"><td><span class="tag tag-accent">1</span></td><td>JD 与真实需求不匹配</td><td>⭐⭐⭐⭐</td></tr>
-      <tr><td>2</td><td>招聘平台压榨，好简历被隐藏</td><td>⭐</td></tr>
-      <tr><td>3</td><td>优秀候选人是被动的</td><td>⭐⭐⭐</td></tr>
-      <tr><td>4</td><td>个性化沟通话术 + 时机</td><td>⭐⭐⭐⭐</td></tr>
-      <tr><td>5</td><td>简历筛选效率</td><td>⭐⭐⭐⭐⭐</td></tr>
+      <tr><th>排序</th><th>痛点</th><th>AI 可介入度</th><th>竞品覆盖</th></tr>
+      <tr class="highlight-row"><td><span class="tag tag-accent">1</span></td><td>JD 与真实需求不匹配</td><td>⭐⭐⭐⭐</td><td><span class="tag tag-muted">空白</span></td></tr>
+      <tr><td>2</td><td>招聘平台压榨，好简历被隐藏</td><td>⭐</td><td>-</td></tr>
+      <tr><td>3</td><td>优秀候选人是被动的</td><td>⭐⭐⭐</td><td>LinkedIn</td></tr>
+      <tr><td>4</td><td>个性化沟通话术 + 时机</td><td>⭐⭐⭐⭐</td><td>-</td></tr>
+      <tr><td>5</td><td>简历筛选效率</td><td>⭐⭐⭐⭐⭐</td><td>Moka/北森</td></tr>
     </table>
-    <p style="font-size:11px;color:var(--text-muted);margin-top:8px">排序来源：HR 从业者深度访谈（非正式）</p>
+    <p style="font-size:10px;color:var(--text-muted);margin-top:6px">数据来源：SHRM Q3 2025 CHRO Outlook + HR 从业者深度访谈</p>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section id="market">
+  <div class="section-num">02 · 竞品分析</div>
+  <h2>市场空白：没有人做"需求对齐"</h2>
+
+  <div class="card">
+    <h3>招聘漏斗中的竞品分布</h3>
+    <div class="flow">
+      <div class="flow-node">需求产生</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node active">JD 编写</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">渠道发布</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">简历收集</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">筛选</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">面试</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">录用</div>
+    </div>
+    <div class="gap-marker">
+      ⬆ 需求对齐环节：无竞品覆盖。Moka/北森/LinkedIn 都从"JD 已有"开始。
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>竞品功能对比</h3>
+    <table>
+      <tr><th>功能</th><th>Moka</th><th>北森</th><th>LinkedIn</th><th style="color:var(--accent)">JD Copilot</th></tr>
+      <tr><td>JD 模板库</td><td>✅</td><td>✅</td><td>✅</td><td>❌ 不做模板</td></tr>
+      <tr class="highlight-row"><td>对话式需求收集</td><td>❌</td><td>❌</td><td>❌</td><td><span class="tag tag-accent">核心能力</span></td></tr>
+      <tr class="highlight-row"><td>结构化需求文档</td><td>❌</td><td>❌</td><td>❌</td><td><span class="tag tag-accent">核心能力</span></td></tr>
+      <tr class="highlight-row"><td>JD 质量评估</td><td>❌</td><td>❌</td><td>部分</td><td><span class="tag tag-accent">核心能力</span></td></tr>
+      <tr><td>简历筛选</td><td>✅</td><td>✅</td><td>✅</td><td>❌ 不做</td></tr>
+      <tr><td>候选人匹配</td><td>✅</td><td>✅</td><td>✅</td><td>❌ 不做</td></tr>
+      <tr><td>人才测评</td><td>❌</td><td>✅</td><td>❌</td><td>❌ 不做</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>为什么竞品没做"需求对齐"？</h3>
+    <div class="grid-2">
+      <div>
+        <p style="font-size:11px">1. <strong>技术难度</strong>：需要对话式 AI，传统关键词匹配不够</p>
+        <p style="font-size:11px">2. <strong>用户习惯</strong>：HR 习惯了"搜 JD 模板"，需要教育市场</p>
+      </div>
+      <div>
+        <p style="font-size:11px">3. <strong>商业模型</strong>：SaaS 追求"全流程覆盖"，单点功能不够吸引付费</p>
+        <p style="font-size:11px">4. <strong>数据壁垒</strong>：需要行业 JD 数据库 + 胜任力模型</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:10px">
+    <div class="card" style="text-align:center">
+      <h4>市场定位</h4>
+      <p style="font-size:11px">低复杂度 · 单点极致 · 专注需求对齐</p>
+      <p style="font-size:10px;color:var(--text-muted)">不做全流程，做第一个信息转换点</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <h4>差异化壁垒</h4>
+      <p style="font-size:11px">LLM 对话能力 + 行业 JD 数据库 + 胜任力模型</p>
+      <p style="font-size:10px;color:var(--text-muted)">竞品需要从零开始建设</p>
+    </div>
   </div>
 </section>
 
 <!-- SOLUTION -->
 <section id="solution">
-  <div class="section-num">02 · WHAT</div>
+  <div class="section-num">03 · 方案定义</div>
   <h2>产品定义：JD Copilot</h2>
+
+  <div class="quote">
+    "不是帮你写 JD（模板化），而是帮你搞清楚要什么样的人（对话式）。不是帮你筛简历（下游），而是帮你定义筛选标准（上游）。"
+  </div>
 
   <div class="grid-2">
     <div class="card">
-      <h4>✅ 做什么</h4>
-      <p style="font-size:13px">• 对话式需求收集（AI 追问 + HR 确认）</p>
-      <p style="font-size:13px">• 结构化需求文档输出</p>
-      <p style="font-size:13px">• JD 草稿生成（行业数据库 + 需求文档）</p>
-      <p style="font-size:13px">• JD 质量评估（覆盖度 + 同行对比）</p>
+      <h4>✅ MVP 做什么</h4>
+      <p style="font-size:11px">• 对话式需求收集（AI 追问 + HR 确认）</p>
+      <p style="font-size:11px">• 结构化需求文档输出</p>
+      <p style="font-size:11px">• JD 草稿生成（行业数据 + 需求文档）</p>
+      <p style="font-size:11px">• JD 质量评估（覆盖度 + 同行对比）</p>
+      <p style="font-size:11px;margin-top:6px"><strong>成功标准</strong>：从"我要一个前端"到拿到 JD ≤ 15 分钟</p>
     </div>
     <div class="card">
-      <h4>❌ 不做什么</h4>
-      <p style="font-size:13px">• 不做简历筛选（下游问题）</p>
-      <p style="font-size:13px">• 不做招聘平台对接（渠道问题）</p>
-      <p style="font-size:13px">• 不做候选人沟通（独立场景）</p>
-      <p style="font-size:13px">• 不代替 HR 做最终审核</p>
+      <h4>❌ MVP 不做什么</h4>
+      <p style="font-size:11px">• 不做简历筛选（下游问题，竞品已覆盖）</p>
+      <p style="font-size:11px">• 不做 ATS 集成（V2 再考虑）</p>
+      <p style="font-size:11px">• 不做候选人沟通（独立场景）</p>
+      <p style="font-size:11px">• 不做批量处理（先做好单次体验）</p>
+      <p style="font-size:11px;margin-top:6px"><strong>边界原则</strong>：单点极致，不做全流程</p>
     </div>
   </div>
 
-  <div class="card" style="margin-top:12px">
+  <div class="card" style="margin-top:10px">
     <h3>Skill Card 六维框架</h3>
     <table>
       <tr><th>维度</th><th>定义</th></tr>
-      <tr><td><span class="tag tag-accent">Intent</span></td><td>帮 HR 从模糊需求出发，系统性收集真实需求，生成结构化 JD</td></tr>
+      <tr><td><span class="tag tag-accent">Intent</span></td><td>帮 HR 把模糊需求转化为结构化岗位要求，减少 JD 与真实需求的错配</td></tr>
       <tr><td><span class="tag tag-accent">Trigger</span></td><td>HR 输入新岗位需求 / 用人部门提出招聘需求</td></tr>
-      <tr><td><span class="tag tag-accent">Boundary</span></td><td>不编造未提及的要求；不代替 HR 做决策；标注"待确认"项</td></tr>
+      <tr><td><span class="tag tag-accent">Boundary</span></td><td>不编造未提及要求；不代替 HR 做决策；标注"待确认"项</td></tr>
       <tr><td><span class="tag tag-accent">Quality Bar</span></td><td>需求覆盖度 ≥ 80%、JD 准确度 ≥ 70%、幻觉率 ≤ 10%</td></tr>
-      <tr><td><span class="tag tag-accent">Golden Examples</span></td><td>10 个标准案例覆盖 4 类场景（标准/复合/模糊/异常）</td></tr>
-      <tr><td><span class="tag tag-accent">Integration</span></td><td>输入：模糊需求文本；输出：需求文档 + JD 草稿 + 质量报告</td></tr>
+      <tr><td><span class="tag tag-accent">Golden</span></td><td>10 个标准案例（标准/复合/模糊/异常 × 4 类场景）</td></tr>
+      <tr><td><span class="tag tag-accent">Integration</span></td><td>输入：模糊需求文本 → 输出：需求文档 + JD 草稿 + 质量报告</td></tr>
     </table>
   </div>
 </section>
 
 <!-- DEMO -->
 <section id="demo">
-  <div class="section-num">03 · DEMO</div>
-  <h2>实际体验：JD Copilot</h2>
-  <p style="font-size:13px;color:var(--text-dim)">输入一个模糊的岗位需求，观察 AI 如何通过对话收集信息并生成 JD。</p>
+  <div class="section-num">04 · 实际体验</div>
+  <h2>Demo：JD Copilot 对话式需求收集</h2>
 
   <div class="chat-container">
     <div class="chat-header">
@@ -244,7 +280,7 @@
         <div class="msg-avatar ai">AI</div>
         <div class="msg-content">
           <p>你好！我是 JD Copilot，帮你把模糊的岗位需求变成靠谱的 JD。</p>
-          <p>请告诉我：<strong>你需要招聘什么岗位？</strong>可以只说一个职位名称，比如"前端工程师"或"产品经理"。</p>
+          <p>请告诉我：<strong>你需要招聘什么岗位？</strong>可以只说一个职位名称。</p>
         </div>
       </div>
     </div>
@@ -261,75 +297,59 @@
     <button class="quick-btn" onclick="quickSend('我要一个厉害的人')">模糊需求</button>
   </div>
 
-  <!-- Requirement Doc Output -->
-  <div class="output-panel" id="reqDocPanel">
-    <h4>📋 结构化需求文档</h4>
-    <pre id="reqDocContent"></pre>
-  </div>
-
-  <!-- JD Output -->
-  <div class="output-panel" id="jdPanel">
-    <h4>📄 JD 草稿</h4>
-    <div id="jdContent" style="font-size:13px;line-height:1.8;"></div>
-  </div>
-
-  <!-- Quality Report -->
-  <div class="output-panel" id="qualityPanel">
-    <h4>📊 质量评估报告</h4>
-    <div id="qualityContent"></div>
-  </div>
+  <div class="output-panel" id="reqDocPanel"><h4>📋 结构化需求文档</h4><pre id="reqDocContent"></pre></div>
+  <div class="output-panel" id="jdPanel"><h4>📄 JD 草稿</h4><div id="jdContent" style="font-size:12px;line-height:1.8"></div></div>
+  <div class="output-panel" id="qualityPanel"><h4>📊 质量评估报告</h4><div id="qualityContent"></div></div>
 </section>
 
 <!-- ARCHITECTURE -->
-<section id="architecture">
-  <div class="section-num">04 · HOW</div>
-  <h2>技术架构</h2>
+<section id="arch">
+  <div class="section-num">05 · 技术架构</div>
+  <h2>为什么是 Plan-and-Solve + Reflection？</h2>
 
   <div class="card">
-    <h3>范式选型：为什么是 Plan-and-Solve + Reflection？</h3>
+    <h3>范式选型决策（Hello-Agents Chapter 4）</h3>
     <table>
       <tr><th>范式</th><th>适用性</th><th>理由</th></tr>
-      <tr><td>ReAct</td><td>⭐⭐</td><td>JD 生成不需要外部工具调用</td></tr>
+      <tr><td>ReAct</td><td>⭐⭐</td><td>JD 生成不需要外部工具调用，不需要实时搜索</td></tr>
       <tr class="highlight-row"><td><strong>Plan-and-Solve</strong></td><td>⭐⭐⭐⭐</td><td>先收集需求再生成 JD，典型的"先规划后执行"</td></tr>
       <tr class="highlight-row"><td><strong>Reflection</strong></td><td>⭐⭐⭐⭐⭐</td><td>JD 质量要求高，需要自校验防止幻觉</td></tr>
     </table>
-    <p style="font-size:11px;color:var(--text-muted);margin-top:8px">范式选择依据：Hello-Agents Chapter 4 — 智能体经典范式构建</p>
   </div>
 
-  <div class="grid-2" style="margin-top:12px">
+  <div class="grid-2" style="margin-top:10px">
     <div class="card">
       <h3>Agent 执行流程</h3>
-      <p style="font-size:12px;font-family:var(--mono);line-height:2">
+      <p style="font-size:11px;font-family:var(--mono);line-height:1.8">
         Phase 1 — <span style="color:var(--think)">Plan</span>（需求收集）<br>
         &nbsp;&nbsp;AI 对话引导 HR 收集需求<br>
         &nbsp;&nbsp;输出：结构化需求文档<br><br>
         Phase 2 — <span style="color:var(--accent)">Solve</span>（JD 生成）<br>
-        &nbsp;&nbsp;基于需求文档 + 行业数据生成 JD<br>
+        &nbsp;&nbsp;基于需求 + 行业数据生成 JD<br>
         &nbsp;&nbsp;输出：JD 草稿<br><br>
         Phase 3 — <span style="color:var(--observe)">Reflect</span>（质量校验）<br>
         &nbsp;&nbsp;自检查：是否有未确认的要求？<br>
-        &nbsp;&nbsp;对比同行 JD，标注差异<br>
         &nbsp;&nbsp;输出：质量评估报告
       </p>
     </div>
     <div class="card">
-      <h3>幻觉防控</h3>
+      <h3>幻觉防控（Hello-Agents Chapter 9）</h3>
       <table>
         <tr><th>风险</th><th>措施</th></tr>
-        <tr><td>编造未提及的要求</td><td>标注来源（"来自对话"或"来自参考"）</td></tr>
-        <tr><td>编造行业数据</td><td>只引用 RAG 检索到的真实 JD</td></tr>
+        <tr><td>编造未提及要求</td><td>标注来源（"来自对话"或"来自参考"）</td></tr>
+        <tr><td>编造行业数据</td><td>只引用 RAG 检索的真实 JD</td></tr>
         <tr><td>格式漂移</td><td>6 层 JSON 兜底 + Few-shot</td></tr>
         <tr><td>上下文丢失</td><td>关键信息每轮带上 + 外部笔记</td></tr>
       </table>
-      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">上下文工程：Hello-Agents Chapter 9 — GSSC 流水线</p>
+      <p style="font-size:9px;color:var(--text-muted);margin-top:6px">上下文工程：GSSC 流水线（Gather-Select-Structure-Compress）</p>
     </div>
   </div>
 </section>
 
 <!-- EVALUATION -->
-<section id="evaluation">
-  <div class="section-num">05 · EVAL</div>
-  <h2>评估体系</h2>
+<section id="eval">
+  <div class="section-num">06 · 评估体系</div>
+  <h2>Eval 框架（Hello-Agents Chapter 12）</h2>
 
   <div class="grid-2">
     <div class="card">
@@ -351,91 +371,93 @@
         <tr><td>Layer 2 标准</td><td>10</td><td>每次提示词修改</td></tr>
         <tr><td>Layer 3 全面</td><td>20+</td><td>每月 / 重大更新</td></tr>
       </table>
-      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">评估框架：Hello-Agents Chapter 12 — 智能体性能评估</p>
+      <p style="font-size:9px;color:var(--text-muted);margin-top:6px">Golden Examples：10 个样本覆盖 4 类场景（标准/复合/模糊/异常）</p>
     </div>
   </div>
 </section>
 
 <!-- COST -->
 <section id="cost">
-  <div class="section-num">06 · COST</div>
-  <h2>Token 经济学</h2>
+  <div class="section-num">07 · 成本与合规</div>
+  <h2>Token 经济学 + 合规设计</h2>
 
-  <div class="grid-3">
+  <div class="grid-4">
     <div class="metric">
       <div class="metric-value">¥0.035</div>
       <div class="metric-label">单次 JD 生成成本</div>
-      <div style="font-size:10px;color:var(--text-muted)">~10K tokens · DeepSeek V4 Pro</div>
+      <div class="metric-sub">~10K tokens · DeepSeek V4 Pro</div>
     </div>
     <div class="metric">
-      <div class="metric-value">4.6×</div>
-      <div class="metric-label">效率提升（理论值）</div>
-      <div style="font-size:10px;color:var(--text-muted)">前提：准确率 ≥ 85%</div>
+      <div class="metric-value">15min</div>
+      <div class="metric-label">目标完成时间</div>
+      <div class="metric-sub">从模糊需求到 JD 草稿</div>
     </div>
     <div class="metric">
-      <div class="metric-value">¥14/月</div>
-      <div class="metric-label">月均成本（400 次）</div>
-      <div style="font-size:10px;color:var(--text-muted)">API 调用成本</div>
+      <div class="metric-value">80%</div>
+      <div class="metric-label">目标需求覆盖度</div>
+      <div class="metric-sub">AI 需求文档覆盖真实需求</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">≤10%</div>
+      <div class="metric-label">目标幻觉率</div>
+      <div class="metric-sub">编造未提及要求的比例</div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px">
-    <h3>诚实声明</h3>
-    <p style="font-size:13px">• 4.6× 效率提升是理论计算值，需要真实数据验证</p>
-    <p style="font-size:13px">• 单次成本只计算了 API 调用，不含基础设施和维护成本</p>
-    <p style="font-size:13px">• 准确率目标（85%）尚未验证，需要 Phase 0 测试</p>
-  </div>
-</section>
-
-<!-- COMPLIANCE -->
-<section id="compliance">
-  <div class="section-num">07 · 合规</div>
-  <h2>合规与风险设计</h2>
-
-  <div class="grid-3">
+  <div class="grid-3" style="margin-top:10px">
     <div class="card">
       <h4>🛡 偏见缓解</h4>
-      <p style="font-size:12px">• 不提取性别/年龄/民族</p>
-      <p style="font-size:12px">• Prompt 禁止敏感属性判断</p>
-      <p style="font-size:12px">• 定期抽检 JD 中的歧视性语言</p>
+      <p style="font-size:10px">• 不提取性别/年龄/民族</p>
+      <p style="font-size:10px">• Prompt 禁止敏感属性判断</p>
+      <p style="font-size:10px">• 定期抽检 JD 中的歧视性语言</p>
     </div>
     <div class="card">
       <h4>🔒 数据隐私</h4>
-      <p style="font-size:12px">• Edge Function 处理，不落盘</p>
-      <p style="font-size:12px">• 用户可请求删除所有数据</p>
-      <p style="font-size:12px">• 日志中 PII 脱敏</p>
+      <p style="font-size:10px">• Edge Function 处理，不落盘</p>
+      <p style="font-size:10px">• 用户可请求删除所有数据</p>
+      <p style="font-size:10px">• 日志中 PII 脱敏</p>
     </div>
     <div class="card">
       <h4>👤 HITL 机制</h4>
-      <p style="font-size:12px">• 置信度 ≥ 0.8：自动输出</p>
-      <p style="font-size:12px">• 0.6-0.8：标记"待审核"</p>
-      <p style="font-size:12px">• &lt; 0.6：转人工判断</p>
+      <p style="font-size:10px">• 置信度 ≥ 0.8：自动输出</p>
+      <p style="font-size:10px">• 0.6-0.8：标记"待审核"</p>
+      <p style="font-size:10px">• &lt; 0.6：转人工判断</p>
     </div>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <h3>诚实声明</h3>
+    <p style="font-size:11px">• 需求覆盖度和 JD 准确度尚未经过真实数据验证，需要 Phase 0 测试</p>
+    <p style="font-size:11px">• 当前 Demo 是模拟对话，非真实 Agent 交互</p>
+    <p style="font-size:11px">• 行业 JD 数据库尚未建立，需要持续积累</p>
+    <p style="font-size:11px">• 偏见检测只有设计，没有实际监控代码</p>
   </div>
 </section>
 
-<!-- NEXT STEPS -->
+<!-- NEXT -->
 <section id="next">
-  <div class="section-num">08 · NEXT</div>
-  <h2>验证计划与优先级</h2>
+  <div class="section-num">08 · 实施计划</div>
+  <h2>四阶段实施 + 已知差距</h2>
 
-  <div class="card">
-    <h3>四阶段实施计划</h3>
-    <table>
-      <tr><th>阶段</th><th>时间</th><th>目标</th><th>交付物</th></tr>
-      <tr><td><span class="tag tag-accent">Phase 0</span></td><td>第 1 周</td><td>验证假设是否成立</td><td>调研报告 + 5 个 HR 访谈</td></tr>
-      <tr><td><span class="tag tag-accent">Phase 1</span></td><td>第 2-3 周</td><td>构建 MVP</td><td>可部署的 Web 应用</td></tr>
-      <tr><td><span class="tag tag-success">Phase 2</span></td><td>第 4 周</td><td>用户测试</td><td>测试报告 + 迭代计划</td></tr>
-      <tr><td><span class="tag tag-success">Phase 3</span></td><td>第 5 周</td><td>作品包装</td><td>完整案例展示页面</td></tr>
-    </table>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <h3>已知差距（诚实面对）</h3>
-    <p style="font-size:13px">• 需求覆盖度和 JD 准确度尚未经过真实数据验证</p>
-    <p style="font-size:13px">• 当前 Demo 是模拟对话，非真实 Agent 交互</p>
-    <p style="font-size:13px">• 行业 JD 数据库尚未建立</p>
-    <p style="font-size:13px">• 偏见检测只有设计，没有实际监控代码</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3>实施计划</h3>
+      <table>
+        <tr><th>阶段</th><th>时间</th><th>目标</th></tr>
+        <tr><td><span class="tag tag-accent">P0</span></td><td>第 1 周</td><td>验证假设：5 个 HR 访谈</td></tr>
+        <tr><td><span class="tag tag-accent">P1</span></td><td>第 2-3 周</td><td>构建 MVP：可部署的 Web 应用</td></tr>
+        <tr><td><span class="tag tag-success">P2</span></td><td>第 4 周</td><td>用户测试：3 个 HR 测试</td></tr>
+        <tr><td><span class="tag tag-success">P3</span></td><td>第 5 周</td><td>作品包装：完整案例展示</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>已知差距（诚实面对）</h3>
+      <p style="font-size:11px">• 需求覆盖度和 JD 准确度尚未经过真实数据验证</p>
+      <p style="font-size:11px">• 当前 Demo 是模拟对话，非真实 Agent 交互</p>
+      <p style="font-size:11px">• 行业 JD 数据库尚未建立</p>
+      <p style="font-size:11px">• 偏见检测只有设计，没有实际监控代码</p>
+      <p style="font-size:11px">• 竞品分析基于公开信息，非深度调研</p>
+    </div>
   </div>
 </section>
 
@@ -446,305 +468,91 @@
 </div>
 
 <script>
-// ═══ JD Copilot Demo — 模拟对话流 ═══
+const FLOWS={
+  '前端工程师':{questions:[
+    {q:'好的，前端工程师。这个岗位主要负责什么项目？C 端产品、B 端后台、还是内部工具？'},
+    {q:'团队现在几个人？这个前端在团队中是什么角色？独立负责还是协作？'},
+    {q:'技术栈有要求吗？React、Vue、Angular？有没有必须具备的技能？'},
+    {q:'薪资范围大概是多少？有没有什么绝对不要的特征？'}
+  ],reqDoc:{title:'前端工程师',hard_requirements:['3年以上前端开发经验','React 精通','TypeScript 熟练','本科及以上学历'],soft_requirements:['有大厂经验优先','有团队管理经验加分'],nice_to_have:['有开源贡献','有 Node.js 全栈经验'],exclude:['频繁跳槽（2年内换3份工作）'],salary_range:'25K-40K',source:{hard:'来自对话第1-3轮',soft:'来自对话第2轮',nice:'来自行业参考'}},
+  jd:'<h3>高级前端工程师</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位经验丰富的高级前端工程师，负责核心产品的前端架构设计和开发工作。</p><p><strong>岗位职责</strong></p><ul><li>负责核心产品的前端架构设计和技术选型</li><li>主导前端工程化建设（构建工具、CI/CD、代码规范）</li><li>解决复杂技术难题（性能优化、跨浏览器兼容）</li><li>参与产品需求评审，从技术角度提供可行性建议</li><li>指导和培养初级前端工程师</li></ul><p><strong>任职要求</strong></p><ul><li>3年以上前端开发经验，精通 React 生态</li><li>熟练使用 TypeScript，有大型项目经验</li><li>熟悉前端工程化工具（Webpack/Vite、ESLint、Jest）</li><li>良好的沟通能力和团队协作精神</li><li>本科及以上学历，计算机相关专业优先</li></ul><p><strong>加分项</strong></p><ul><li>有大厂前端开发经验</li><li>有微前端架构实践经验</li><li>有开源项目贡献或技术博客</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
+  quality:{coverage:85,accuracy:78,hallucination:5,confidence:0.82}},
 
-const FLOWS = {
-  '前端工程师': {
-    questions: [
-      { q: '好的，前端工程师。我需要了解更多信息来生成一份精准的 JD。', follow: '这个岗位主要负责什么项目？是 C 端产品、B 端后台、还是内部工具？' },
-      { q: '明白了。团队现在几个人？这个前端在团队中是什么角色？', follow: '是独立负责前端，还是和现有团队协作？' },
-      { q: '技术栈有要求吗？React、Vue、Angular？', follow: '有没有必须具备的技能？比如 TypeScript、微前端、Node.js？' },
-      { q: '薪资范围大概是多少？这个会影响 JD 中的描述。', follow: '有没有什么绝对不要的特征？比如频繁跳槽、学历要求？' },
-    ],
-    reqDoc: {
-      title: '前端工程师',
-      hard_requirements: ['3年以上前端开发经验', 'React 精通', 'TypeScript 熟练', '本科及以上学历'],
-      soft_requirements: ['有大厂经验优先', '有团队管理经验加分', '有微前端经验加分'],
-      nice_to_have: ['有开源贡献', '有 Node.js 全栈经验', '有性能优化经验'],
-      exclude: ['频繁跳槽（2年内换3份工作）', '无实际项目经验'],
-      salary_range: '25K-40K',
-      source: { hard: '来自对话第1-3轮', soft: '来自对话第2轮', nice: '来自行业参考' }
-    },
-    jd: `<h3>高级前端工程师</h3>
-<p><strong>岗位描述</strong></p>
-<p>我们正在寻找一位经验丰富的高级前端工程师，负责核心产品的前端架构设计和开发工作。你将与产品、设计、后端团队紧密协作，打造高质量的用户体验。</p>
+  '产品经理':{questions:[
+    {q:'产品经理，了解。这个 PM 主要负责什么方向？C 端、B 端、还是平台型产品？'},
+    {q:'需要技术背景吗？有些岗位要求 PM 能看懂代码。'},
+    {q:'团队规模和汇报关系？独立带产品线还是协助高级 PM？'},
+    {q:'有没有行业要求？比如电商、金融、教育。'}
+  ],reqDoc:{title:'产品经理',hard_requirements:['3年以上产品经验','有完整项目上线经验','本科及以上学历'],soft_requirements:['B 端产品经验优先','有数据驱动决策能力'],nice_to_have:['技术背景','有 AI 产品经验'],exclude:['无独立负责产品经验','频繁跳槽'],salary_range:'20K-35K',source:{hard:'来自对话第1-3轮',soft:'来自对话第2轮',nice:'来自行业参考'}},
+  jd:'<h3>高级产品经理</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位资深的产品经理，负责核心产品线的规划、设计和落地。</p><p><strong>岗位职责</strong></p><ul><li>负责产品规划和路线图制定，驱动产品从 0 到 1</li><li>深入理解用户需求，输出 PRD、原型和交互设计</li><li>协调研发、设计、运营等跨团队资源</li><li>建立数据指标体系，通过数据驱动产品优化</li><li>跟踪行业趋势和竞品动态</li></ul><p><strong>任职要求</strong></p><ul><li>3年以上产品经验，有完整的项目上线经历</li><li>优秀的需求分析和文档输出能力</li><li>熟练使用数据分析工具（SQL、Excel）</li><li>良好的沟通能力和跨团队协作能力</li><li>本科及以上学历</li></ul><p><strong>加分项</strong></p><ul><li>有 B 端 SaaS 产品经验</li><li>有技术背景</li><li>有 AI 产品设计经验</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
+  quality:{coverage:82,accuracy:75,hallucination:8,confidence:0.78}},
 
-<p><strong>岗位职责</strong></p>
-<ul>
-<li>负责核心产品的前端架构设计和技术选型</li>
-<li>主导前端工程化建设，包括构建工具、CI/CD、代码规范</li>
-<li>解决复杂的技术难题，如性能优化、跨浏览器兼容</li>
-<li>参与产品需求评审，从技术角度提供可行性建议</li>
-<li>指导和培养初级前端工程师</li>
-</ul>
+  '数据分析师':{questions:[
+    {q:'数据分析师，好的。这个岗位主要做什么？报表、用户分析、还是算法模型？'},
+    {q:'技术要求什么水平？SQL + Excel 就够，还是需要 Python/R？'},
+    {q:'需要有业务理解能力吗？能独立提出数据洞察？'}
+  ],reqDoc:{title:'数据分析师',hard_requirements:['2年以上数据分析经验','SQL 熟练','Excel/可视化工具精通'],soft_requirements:['Python/R 加分','有业务理解能力'],nice_to_have:['有机器学习基础','有 Tableau/PowerBI 经验'],exclude:['只会写 SQL 不会分析'],salary_range:'15K-25K',source:{hard:'来自对话第1轮',soft:'来自对话第2-3轮',nice:'来自行业参考'}},
+  jd:'<h3>数据分析师</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位数据分析师，负责业务数据的采集、分析和洞察，为产品和运营决策提供数据支持。</p><p><strong>岗位职责</strong></p><ul><li>负责业务数据的日常监控和异常预警</li><li>深入分析用户行为数据，输出可执行的洞察报告</li><li>搭建数据指标体系和可视化看板</li><li>支持产品和运营团队的数据需求</li><li>参与 A/B 测试设计和效果评估</li></ul><p><strong>任职要求</strong></p><ul><li>2年以上数据分析经验</li><li>精通 SQL，熟练使用 Excel</li><li>熟悉至少一种数据可视化工具</li><li>良好的逻辑思维和业务理解能力</li><li>本科及以上学历</li></ul><p><strong>加分项</strong></p><ul><li>熟练使用 Python 或 R</li><li>有机器学习基础</li><li>有行业数据分析经验</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
+  quality:{coverage:80,accuracy:72,hallucination:10,confidence:0.75}},
 
-<p><strong>任职要求</strong></p>
-<ul>
-<li>3年以上前端开发经验，精通 React 生态</li>
-<li>熟练使用 TypeScript，有大型项目经验</li>
-<li>熟悉前端工程化工具（Webpack/Vite、ESLint、Jest）</li>
-<li>良好的沟通能力和团队协作精神</li>
-<li>本科及以上学历，计算机相关专业优先</li>
-</ul>
-
-<p><strong>加分项</strong></p>
-<ul>
-<li>有大厂（字节、阿里、腾讯等）前端开发经验</li>
-<li>有微前端架构实践经验</li>
-<li>有开源项目贡献或技术博客</li>
-<li>有 Node.js 全栈开发经验</li>
-</ul>
-
-<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
-    quality: { coverage: 85, accuracy: 78, hallucination: 5, confidence: 0.82 }
-  },
-
-  '产品经理': {
-    questions: [
-      { q: '产品经理，了解。这个 PM 主要负责什么方向？C 端、B 端、还是平台型产品？' },
-      { q: '需要技术背景吗？有些岗位要求 PM 能看懂代码。' },
-      { q: '团队规模和汇报关系是怎样的？是独立带产品线还是协助高级 PM？' },
-      { q: '有没有行业要求？比如电商、金融、教育等。' },
-    ],
-    reqDoc: {
-      title: '产品经理',
-      hard_requirements: ['3年以上产品经验', '有完整的项目上线经验', '本科及以上学历'],
-      soft_requirements: ['B 端产品经验优先', '有数据驱动决策能力', '有跨团队协作经验'],
-      nice_to_have: ['技术背景（能看懂代码）', '有 AI 产品经验', '有行业资源'],
-      exclude: ['无独立负责产品经验', '频繁跳槽'],
-      salary_range: '20K-35K',
-      source: { hard: '来自对话第1-3轮', soft: '来自对话第2轮', nice: '来自行业参考' }
-    },
-    jd: `<h3>高级产品经理</h3>
-<p><strong>岗位描述</strong></p>
-<p>我们正在寻找一位资深的产品经理，负责核心产品线的规划、设计和落地。你将从用户需求出发，驱动产品从 0 到 1 和持续迭代。</p>
-
-<p><strong>岗位职责</strong></p>
-<ul>
-<li>负责产品规划和路线图制定，驱动产品从 0 到 1</li>
-<li>深入理解用户需求，输出 PRD、原型和交互设计</li>
-<li>协调研发、设计、运营等跨团队资源，推动项目按时交付</li>
-<li>建立数据指标体系，通过数据驱动产品优化</li>
-<li>跟踪行业趋势和竞品动态，发现新的产品机会</li>
-</ul>
-
-<p><strong>任职要求</strong></p>
-<ul>
-<li>3年以上产品经验，有完整的项目上线经历</li>
-<li>优秀的需求分析和文档输出能力</li>
-<li>熟练使用数据分析工具（SQL、Excel、数据平台）</li>
-<li>良好的沟通能力和跨团队协作能力</li>
-<li>本科及以上学历</li>
-</ul>
-
-<p><strong>加分项</strong></p>
-<ul>
-<li>有 B 端 SaaS 产品经验</li>
-<li>有技术背景，能与研发团队高效沟通</li>
-<li>有 AI 产品设计经验</li>
-</ul>
-
-<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
-    quality: { coverage: 82, accuracy: 75, hallucination: 8, confidence: 0.78 }
-  },
-
-  '数据分析师': {
-    questions: [
-      { q: '数据分析师，好的。这个岗位主要做什么？是做报表、做用户分析、还是做算法模型？' },
-      { q: '技术要求是什么水平？SQL + Excel 就够，还是需要 Python/R？' },
-      { q: '需要有业务理解能力吗？比如能独立提出数据洞察。' },
-    ],
-    reqDoc: {
-      title: '数据分析师',
-      hard_requirements: ['2年以上数据分析经验', 'SQL 熟练', 'Excel/数据可视化工具精通'],
-      soft_requirements: ['Python/R 加分', '有业务理解能力', '有独立分析项目经验'],
-      nice_to_have: ['有机器学习基础', '有行业经验', '有 Tableau/PowerBI 经验'],
-      exclude: ['只会写 SQL 不会分析', '无独立项目经验'],
-      salary_range: '15K-25K',
-      source: { hard: '来自对话第1轮', soft: '来自对话第2-3轮', nice: '来自行业参考' }
-    },
-    jd: `<h3>数据分析师</h3>
-<p><strong>岗位描述</strong></p>
-<p>我们正在寻找一位数据分析师，负责业务数据的采集、分析和洞察，为产品和运营决策提供数据支持。</p>
-
-<p><strong>岗位职责</strong></p>
-<ul>
-<li>负责业务数据的日常监控和异常预警</li>
-<li>深入分析用户行为数据，输出可执行的洞察报告</li>
-<li>搭建数据指标体系和可视化看板</li>
-<li>支持产品和运营团队的数据需求</li>
-<li>参与 A/B 测试设计和效果评估</li>
-</ul>
-
-<p><strong>任职要求</strong></p>
-<ul>
-<li>2年以上数据分析经验</li>
-<li>精通 SQL，熟练使用 Excel 进行数据处理</li>
-<li>熟悉至少一种数据可视化工具（Tableau、PowerBI 等）</li>
-<li>良好的逻辑思维和业务理解能力</li>
-<li>本科及以上学历，统计学、数学、计算机相关专业优先</li>
-</ul>
-
-<p><strong>加分项</strong></p>
-<ul>
-<li>熟练使用 Python 或 R 进行数据分析</li>
-<li>有机器学习基础</li>
-<li>有电商/金融/教育等行业数据分析经验</li>
-</ul>
-
-<p><em>注：以上"岗位职责"基于行业参考，具体职责请与用人部门确认。</em></p>`,
-    quality: { coverage: 80, accuracy: 72, hallucination: 10, confidence: 0.75 }
-  },
-
-  '我要一个厉害的人': {
-    questions: [
-      { q: '理解，"厉害的人"可以有很多含义。让我帮你拆解一下。' },
-      { q: '这个岗位是什么方向？技术、产品、运营、还是其他？' },
-      { q: '你希望 TA 具备什么核心能力？比如：能独立带项目、有行业资源、技术特别强？' },
-      { q: '有没有具体的行业或领域要求？' },
-    ],
-    reqDoc: {
-      title: '待定（需求模糊）',
-      hard_requirements: ['待确认 — 用人部门需明确岗位方向'],
-      soft_requirements: ['待确认 — 需明确核心能力要求'],
-      nice_to_have: ['待确认'],
-      exclude: ['待确认'],
-      salary_range: '待确认',
-      source: { hard: '⚠️ 用人部门未明确', soft: '⚠️ 用人部门未明确', nice: '⚠️ 用人部门未明确' }
-    },
-    jd: `<h3>⚠️ 需求信息不足</h3>
-<p>当前需求描述过于模糊（"我要一个厉害的人"），无法生成有效的 JD。</p>
-<p><strong>建议：</strong></p>
-<ul>
-<li>请与用人部门确认具体的岗位方向（技术/产品/运营/其他）</li>
-<li>请明确核心能力要求（能独立带项目？有行业资源？技术特别强？）</li>
-<li>请确认薪资范围和汇报关系</li>
-</ul>
-<p>补充以上信息后，我可以为你生成一份精准的 JD。</p>`,
-    quality: { coverage: 30, accuracy: 0, hallucination: 0, confidence: 0.35 }
-  }
+  '我要一个厉害的人':{questions:[
+    {q:'理解，"厉害的人"可以有很多含义。让我帮你拆解一下。这个岗位是什么方向？技术、产品、运营？'},
+    {q:'你希望 TA 具备什么核心能力？能独立带项目？有行业资源？技术特别强？'},
+    {q:'有没有具体的行业或领域要求？'}
+  ],reqDoc:{title:'待定（需求模糊）',hard_requirements:['待确认 — 用人部门需明确岗位方向'],soft_requirements:['待确认 — 需明确核心能力要求'],nice_to_have:['待确认'],exclude:['待确认'],salary_range:'待确认',source:{hard:'⚠️ 未明确',soft:'⚠️ 未明确',nice:'⚠️ 未明确'}},
+  jd:'<h3>⚠️ 需求信息不足</h3><p>当前需求描述过于模糊，无法生成有效的 JD。</p><p><strong>建议：</strong></p><ul><li>请与用人部门确认具体的岗位方向</li><li>请明确核心能力要求</li><li>请确认薪资范围和汇报关系</li></ul><p>补充以上信息后，可以为你生成一份精准的 JD。</p>',
+  quality:{coverage:30,accuracy:0,hallucination:0,confidence:0.35}}
 };
 
-let currentFlow = null;
-let currentStep = 0;
+let currentFlow=null,currentStep=0;
 
-function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-
-  // Add user message
-  addMessage('user', text);
-
-  // Find matching flow
-  if (!currentFlow) {
-    const flowKey = Object.keys(FLOWS).find(k => text.includes(k) || k.includes(text));
-    if (flowKey) {
-      currentFlow = FLOWS[flowKey];
-      currentStep = 0;
-      document.getElementById('quickBtns').style.display = 'none';
-      setTimeout(() => askNextQuestion(), 800);
-    } else {
-      // Default: try to match
-      setTimeout(() => {
-        addMessage('ai', '我没有完全理解你的需求。你可以试试选择一个预设岗位，或者更具体地描述，比如"我需要一个有 3 年经验的前端工程师"。');
-      }, 500);
-    }
+function sendMessage(){
+  const input=document.getElementById('chatInput');const text=input.value.trim();if(!text)return;input.value='';
+  addMessage('user',text);
+  if(!currentFlow){
+    const flowKey=Object.keys(FLOWS).find(k=>text.includes(k)||k.includes(text));
+    if(flowKey){currentFlow=FLOWS[flowKey];currentStep=0;document.getElementById('quickBtns').style.display='none';setTimeout(()=>askNextQuestion(),800);}
+    else{setTimeout(()=>addMessage('ai','我没有完全理解你的需求。你可以试试选择一个预设岗位，或者更具体地描述。'),500);}
     return;
   }
 }
 
-function quickSend(text) {
-  document.getElementById('chatInput').value = text;
-  sendMessage();
+function quickSend(text){document.getElementById('chatInput').value=text;sendMessage();}
+
+function askNextQuestion(){
+  if(!currentFlow||currentStep>=currentFlow.questions.length){setTimeout(()=>generateOutput(),500);return;}
+  const q=currentFlow.questions[currentStep];
+  addMessage('ai',q.q);currentStep++;
+  setTimeout(()=>{if(currentStep<currentFlow.questions.length){addMessage('user','（继续回答...）');setTimeout(()=>askNextQuestion(),600);}else{addMessage('user','（信息已提供）');setTimeout(()=>generateOutput(),500);}},1500);
 }
 
-function askNextQuestion() {
-  if (!currentFlow || currentStep >= currentFlow.questions.length) {
-    // All questions asked, generate output
-    setTimeout(() => generateOutput(), 500);
-    return;
-  }
-
-  const q = currentFlow.questions[currentStep];
-  addMessage('ai', q.q + (q.follow ? '<br><br>' + q.follow : ''));
-  currentStep++;
-
-  // Auto-continue after a delay (simulate user answering)
-  setTimeout(() => {
-    if (currentStep < currentFlow.questions.length) {
-      addMessage('user', '（继续回答...）');
-      setTimeout(() => askNextQuestion(), 600);
-    } else {
-      addMessage('user', '（信息已提供）');
-      setTimeout(() => generateOutput(), 500);
-    }
-  }, 1500);
+function generateOutput(){
+  addMessage('ai','好的，信息已收集完毕。现在为你生成结构化需求文档和 JD 草稿...');
+  setTimeout(()=>{
+    const reqPanel=document.getElementById('reqDocPanel');reqPanel.classList.add('active');
+    document.getElementById('reqDocContent').textContent=JSON.stringify(currentFlow.reqDoc,null,2);
+    addMessage('ai','📋 <strong>结构化需求文档</strong>已生成。');
+    setTimeout(()=>{
+      document.getElementById('jdPanel').classList.add('active');
+      document.getElementById('jdContent').innerHTML=currentFlow.jd;
+      addMessage('ai','📄 <strong>JD 草稿</strong>已生成。标注"来自行业参考"的部分请与用人部门确认。');
+      setTimeout(()=>{
+        document.getElementById('qualityPanel').classList.add('active');
+        const q=currentFlow.quality;
+        document.getElementById('qualityContent').innerHTML=`<div class="grid-4" style="text-align:center"><div><div style="font-size:18px;color:var(--accent)">${q.coverage}%</div><div style="font-size:9px;color:var(--text-dim)">需求覆盖度</div></div><div><div style="font-size:18px;color:var(--accent)">${q.accuracy}%</div><div style="font-size:9px;color:var(--text-dim)">JD 准确度</div></div><div><div style="font-size:18px;color:var(--success)">${q.hallucination}%</div><div style="font-size:9px;color:var(--text-dim)">幻觉率</div></div><div><div style="font-size:18px;color:var(--think)">${q.confidence}</div><div style="font-size:9px;color:var(--text-dim)">置信度</div></div></div><p style="font-size:10px;color:var(--text-muted);margin-top:6px">${q.confidence>=0.8?'✅ 置信度足够，可直接使用':q.confidence>=0.6?'⚠️ 建议 HR 审核后使用':'❌ 需求信息不足，建议补充后重新生成'}</p>`;
+        addMessage('ai','📊 <strong>质量评估</strong>：'+(q.confidence>=0.8?'置信度足够，JD 可直接使用。':q.confidence>=0.6?'建议 HR 审核后使用。':'需求信息不足，建议补充后重新生成。'));
+      },800);
+    },1000);
+  },1000);
 }
 
-function generateOutput() {
-  addMessage('ai', '好的，我已经收集了足够的信息。现在为你生成结构化需求文档和 JD 草稿...');
-
-  setTimeout(() => {
-    // Show requirement doc
-    const reqPanel = document.getElementById('reqDocPanel');
-    reqPanel.classList.add('active');
-    const req = currentFlow.reqDoc;
-    document.getElementById('reqDocContent').textContent = JSON.stringify(req, null, 2);
-
-    addMessage('ai', '📋 <strong>结构化需求文档</strong>已生成。请查看下方。');
-
-    setTimeout(() => {
-      // Show JD
-      const jdPanel = document.getElementById('jdPanel');
-      jdPanel.classList.add('active');
-      document.getElementById('jdContent').innerHTML = currentFlow.jd;
-
-      addMessage('ai', '📄 <strong>JD 草稿</strong>已生成。注意：标注"来自行业参考"的部分请与用人部门确认。');
-
-      setTimeout(() => {
-        // Show quality report
-        const qualityPanel = document.getElementById('qualityPanel');
-        qualityPanel.classList.add('active');
-        const q = currentFlow.quality;
-        document.getElementById('qualityContent').innerHTML = `
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
-            <div><div style="font-size:20px;color:var(--accent)">${q.coverage}%</div><div style="font-size:10px;color:var(--text-dim)">需求覆盖度</div></div>
-            <div><div style="font-size:20px;color:var(--accent)">${q.accuracy}%</div><div style="font-size:10px;color:var(--text-dim)">JD 准确度</div></div>
-            <div><div style="font-size:20px;color:var(--success)">${q.hallucination}%</div><div style="font-size:10px;color:var(--text-dim)">幻觉率</div></div>
-            <div><div style="font-size:20px;color:var(--think)">${q.confidence}</div><div style="font-size:10px;color:var(--text-dim)">置信度</div></div>
-          </div>
-          <p style="font-size:11px;color:var(--text-muted);margin-top:8px">
-            ${q.confidence >= 0.8 ? '✅ 置信度足够，可直接使用' : q.confidence >= 0.6 ? '⚠️ 建议 HR 审核后使用' : '❌ 需求信息不足，建议补充后重新生成'}
-          </p>
-        `;
-
-        addMessage('ai', '📊 <strong>质量评估报告</strong>：' +
-          (q.confidence >= 0.8 ? '置信度足够，JD 可直接使用。' :
-           q.confidence >= 0.6 ? '建议 HR 审核后使用，部分需求待确认。' :
-           '需求信息不足，建议补充后重新生成。'));
-      }, 800);
-    }, 1000);
-  }, 1000);
+function addMessage(role,content){
+  const container=document.getElementById('chatMessages');const msg=document.createElement('div');msg.className='msg';
+  msg.innerHTML=`<div class="msg-avatar ${role}">${role==='ai'?'AI':'HR'}</div><div class="msg-content">${content}</div>`;
+  container.appendChild(msg);container.scrollTop=container.scrollHeight;
 }
 
-function addMessage(role, content) {
-  const container = document.getElementById('chatMessages');
-  const msg = document.createElement('div');
-  msg.className = 'msg';
-  msg.innerHTML = `
-    <div class="msg-avatar ${role}">${role === 'ai' ? 'AI' : 'HR'}</div>
-    <div class="msg-content">${content}</div>
-  `;
-  container.appendChild(msg);
-  container.scrollTop = container.scrollHeight;
-}
-
-// Enter key to send
-document.getElementById('chatInput').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
-});
+document.getElementById('chatInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage();});
 </script>
 </body>
 </html>

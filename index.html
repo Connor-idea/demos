@@ -3,306 +3,856 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demos - Connor | AI Agent 作品集</title>
+  <title>智聘助手 — AI Agent 设计案例 | Connor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a; --bg-card: #111; --text: #e8e8e8; --text-dim: #888;
-      --accent: #c9a96e; --accent-dim: rgba(201,169,110,0.15);
-      --ink: #2a2a2a; --border: #222; --success: #4ade80; --warning: #fbbf24; --error: #f87171;
+      --bg: #080808; --bg-card: #0f0f0f; --bg-code: #0a0a0a;
+      --text: #e0e0e0; --text-dim: #888; --text-muted: #555;
+      --accent: #c9a96e; --accent-dim: rgba(201,169,110,0.1); --accent-glow: rgba(201,169,110,0.05);
+      --border: #1a1a1a; --border-light: #222;
+      --think: #7c9fd4; --act: #c9a96e; --observe: #6bc77b;
+      --success: #4ade80; --warning: #fbbf24; --error: #f87171;
+      --serif: "Noto Serif SC", "Georgia", serif;
+      --mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: "Noto Serif SC", serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(201,169,110,0.03) 0%, transparent 50%); pointer-events: none; }
-    .container { max-width: 1000px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
-    header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); }
-    .header-inner { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 20px; letter-spacing: 0.1em; color: var(--accent); }
-    .logo span { color: var(--text-dim); font-size: 14px; margin-left: 8px; }
-    nav a { margin-left: 32px; text-decoration: none; color: var(--text-dim); font-size: 14px; transition: color 0.3s; }
-    nav a:hover { color: var(--accent); }
-    .hero { padding: 80px 0 60px; text-align: center; }
-    .hero h1 { font-size: 42px; font-weight: 400; letter-spacing: 0.15em; margin-bottom: 16px; }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero p { font-size: 16px; color: var(--text-dim); max-width: 500px; margin: 0 auto 40px; line-height: 1.8; }
-    .badges { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .badge { padding: 6px 16px; border: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
-    .agent-section { padding: 60px 0; }
-    .section-title { font-size: 24px; font-weight: 400; letter-spacing: 0.1em; margin-bottom: 8px; color: var(--accent); }
-    .section-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 40px; }
-    .agent-container { background: var(--bg-card); border: 1px solid var(--border); }
-    .agent-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-    .agent-title { font-size: 14px; color: var(--accent); }
-    .agent-status { font-size: 12px; color: var(--success); }
-    .agent-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 500px; }
-    .input-panel { padding: 24px; border-right: 1px solid var(--border); }
-    .output-panel { padding: 24px; background: rgba(0,0,0,0.2); }
-    label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 8px; letter-spacing: 0.05em; }
-    textarea { width: 100%; height: 160px; background: var(--bg); border: 1px solid var(--border); padding: 12px; color: var(--text); font-size: 13px; font-family: monospace; resize: vertical; line-height: 1.6; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--serif); background: var(--bg); color: var(--text); line-height: 1.9; font-size: 15px; }
+    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(201,169,110,0.02) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(124,159,212,0.015) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+
+    /* Layout */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+    section { padding: 64px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    /* Typography */
+    h1 { font-size: 36px; font-weight: 300; letter-spacing: 0.12em; line-height: 1.4; }
+    h2 { font-size: 22px; font-weight: 400; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 24px; }
+    h3 { font-size: 16px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 12px; }
+    h4 { font-size: 14px; font-weight: 600; color: var(--text-dim); margin-bottom: 8px; }
+    p { margin-bottom: 16px; }
+    .dim { color: var(--text-dim); }
+    .muted { color: var(--text-muted); }
+    .accent { color: var(--accent); }
+    .mono { font-family: var(--mono); font-size: 13px; }
+    strong { font-weight: 600; }
+    em { font-style: normal; color: var(--accent); }
+
+    /* Nav */
+    nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(8,8,8,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; padding: 12px 0; }
+    nav .container { display: flex; justify-content: space-between; align-items: center; }
+    .nav-logo { font-size: 14px; letter-spacing: 0.15em; color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 12px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--accent); }
+    body { padding-top: 48px; }
+
+    /* Hero */
+    .hero { padding: 100px 0 80px; text-align: center; }
+    .hero-label { font-size: 11px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
+    .hero h1 { margin-bottom: 20px; }
+    .hero h1 span { color: var(--accent); }
+    .hero-sub { font-size: 15px; color: var(--text-dim); max-width: 560px; margin: 0 auto 32px; }
+    .hero-meta { display: flex; justify-content: center; gap: 32px; font-size: 12px; color: var(--text-muted); }
+    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
+    .card-accent { border-left: 3px solid var(--accent); }
+
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    th { text-align: left; padding: 10px 12px; background: var(--bg-card); color: var(--text-dim); font-weight: 400; border-bottom: 1px solid var(--border); font-size: 12px; letter-spacing: 0.03em; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    tr:hover td { background: rgba(201,169,110,0.02); }
+    .highlight-row td { background: var(--accent-dim); }
+
+    /* Tags */
+    .tag { display: inline-block; padding: 3px 10px; font-size: 11px; margin: 2px 4px 2px 0; border: 1px solid var(--border); }
+    .tag-accent { color: var(--accent); border-color: rgba(201,169,110,0.3); background: var(--accent-dim); }
+    .tag-success { color: var(--success); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.08); }
+    .tag-warning { color: var(--warning); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); }
+
+    /* Code block */
+    .code-block { background: var(--bg-code); border: 1px solid var(--border); padding: 16px; font-family: var(--mono); font-size: 12px; line-height: 1.8; overflow-x: auto; margin-bottom: 16px; white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
+    .code-block .comment { color: #4a4a4a; }
+    .code-block .key { color: var(--think); }
+    .code-block .string { color: var(--observe); }
+    .code-block .important { color: var(--accent); }
+
+    /* Metrics */
+    .metric { text-align: center; padding: 20px; }
+    .metric-value { font-size: 36px; font-weight: 300; color: var(--accent); line-height: 1; }
+    .metric-label { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+    .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Flow diagram */
+    .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+    .flow-node { padding: 8px 16px; border: 1px solid var(--border); font-size: 12px; background: var(--bg-card); }
+    .flow-arrow { color: var(--text-muted); font-size: 14px; }
+    .flow-node.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* Quote */
+    .quote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 16px 0; font-style: italic; color: var(--text-dim); background: var(--accent-dim); font-size: 14px; }
+
+    /* Demo Section */
+    .demo-section { background: var(--bg-card); border: 1px solid var(--border); padding: 24px; }
+    textarea { width: 100%; height: 120px; background: var(--bg); border: 1px solid var(--border); padding: 12px; color: var(--text); font-size: 13px; font-family: var(--mono); resize: vertical; line-height: 1.6; }
     textarea:focus { outline: none; border-color: var(--accent); }
-    textarea::placeholder { color: #444; }
-    .btn { width: 100%; padding: 14px; background: var(--accent); color: var(--bg); border: none; font-size: 14px; letter-spacing: 0.1em; cursor: pointer; margin-top: 16px; font-family: inherit; transition: opacity 0.3s; }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .result-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 14px; }
-    .loading { display: none; text-align: center; padding: 60px 0; }
-    .loading.active { display: block; }
-    .loading-dots { display: inline-flex; gap: 8px; }
-    .loading-dots span { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 1.4s infinite; }
-    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
-    .loading-text { font-size: 13px; color: var(--text-dim); margin-top: 16px; }
-    .result-card { display: none; }
-    .result-card.active { display: block; }
-    .result-section { margin-bottom: 24px; }
-    .result-section h3 { font-size: 12px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .info-item { padding: 8px 12px; background: var(--bg); }
-    .info-label { font-size: 11px; color: var(--text-dim); }
-    .info-value { font-size: 14px; margin-top: 2px; }
-    .score-bar { margin-bottom: 12px; }
-    .score-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .score-label { font-size: 12px; color: var(--text-dim); }
-    .score-value { font-size: 12px; color: var(--accent); }
-    .score-track { height: 4px; background: var(--ink); overflow: hidden; }
-    .score-fill { height: 100%; background: var(--accent); transition: width 0.8s; }
-    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { padding: 4px 10px; background: var(--accent-dim); border: 1px solid rgba(201,169,110,0.2); font-size: 12px; color: var(--accent); }
-    .recommendation { padding: 16px; background: var(--accent-dim); border: 1px solid rgba(201,169,110,0.3); text-align: center; }
-    .recommendation .label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
-    .recommendation .value { font-size: 20px; color: var(--accent); letter-spacing: 0.1em; }
-    .confidence-badge { display: inline-block; padding: 4px 12px; font-size: 12px; margin-top: 8px; }
-    .confidence-high { background: rgba(74,222,128,0.15); color: var(--success); }
-    .confidence-medium { background: rgba(251,191,36,0.15); color: var(--warning); }
-    .confidence-low { background: rgba(248,113,113,0.15); color: var(--error); }
-    .token-info { margin-top: 16px; padding: 12px; background: var(--bg); display: none; }
-    .token-info.active { display: block; }
-    .token-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); padding: 4px 0; }
-    .token-row span:last-child { color: var(--accent); }
-    .methodology { padding: 80px 0; border-top: 1px solid var(--border); }
-    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
-    .method-card { padding: 24px; background: var(--bg-card); border: 1px solid var(--border); }
-    .method-card h4 { font-size: 14px; color: var(--accent); margin-bottom: 8px; }
-    .method-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
-    footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; }
-    footer p { font-size: 12px; color: var(--text-dim); }
-    @media (max-width: 768px) {
-      .agent-body { grid-template-columns: 1fr; }
-      .input-panel { border-right: none; border-bottom: 1px solid var(--border); }
-      .hero h1 { font-size: 28px; }
-      .method-grid { grid-template-columns: 1fr; }
+    textarea::placeholder { color: #333; }
+    .btn { padding: 10px 24px; border: none; font-size: 13px; letter-spacing: 0.1em; cursor: pointer; font-family: var(--serif); transition: all 0.3s; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Trace */
+    .step-card { background: var(--bg); border: 1px solid var(--border); margin-bottom: 8px; overflow: hidden; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .step-row { padding: 8px 14px; display: flex; align-items: center; gap: 10px; }
+    .step-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 50%; flex-shrink: 0; }
+    .step-icon.think { background: rgba(124,159,212,0.15); color: var(--think); }
+    .step-icon.observe { background: rgba(107,199,123,0.15); color: var(--observe); }
+    .step-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .step-label.think { color: var(--think); }
+    .step-label.observe { color: var(--observe); }
+    .step-tool { font-size: 11px; color: var(--text-dim); margin-left: auto; font-family: var(--mono); }
+    .step-body { padding: 8px 14px 10px 48px; font-size: 12px; line-height: 1.7; }
+    .step-body.think { color: var(--text-dim); border-left: 2px solid var(--think); margin-left: 14px; padding-left: 14px; }
+    .step-body.observe { border-left: 2px solid var(--observe); margin-left: 14px; padding-left: 14px; font-family: var(--mono); font-size: 11px; }
+    .step-body pre { white-space: pre-wrap; word-break: break-all; color: var(--text-dim); }
+    .step-loading { padding: 6px 14px 6px 48px; }
+    .step-loading .dots { display: inline-flex; gap: 4px; }
+    .step-loading .dots span { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; animation: pulse 1.4s infinite; }
+    .step-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .step-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+    /* Report */
+    .report-card { background: var(--bg); border: 1px solid var(--accent); margin-top: 16px; display: none; }
+    .report-card.active { display: block; animation: fadeIn 0.5s ease; }
+    .report-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .report-body { padding: 18px; }
+    .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .score-item { background: var(--bg-card); padding: 10px; border: 1px solid var(--border); text-align: center; }
+    .score-label { font-size: 10px; color: var(--text-dim); }
+    .score-value { font-size: 22px; font-weight: 300; color: var(--accent); }
+    .score-bar { height: 2px; background: var(--border); margin-top: 6px; }
+    .score-bar-fill { height: 100%; background: var(--accent); transition: width 0.6s; }
+
+    /* Section number */
+    .section-num { font-size: 11px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+
+    /* TOC */
+    .toc { display: flex; gap: 16px; flex-wrap: wrap; margin: 24px 0; }
+    .toc a { font-size: 12px; color: var(--text-dim); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); transition: all 0.3s; }
+    .toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Footer */
+    footer { padding: 40px 0; border-top: 1px solid var(--border); }
+    footer p { font-size: 12px; color: var(--text-muted); text-align: center; }
+
+    @media(max-width:640px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .score-grid { grid-template-columns: 1fr 1fr; }
+      .hero-meta { flex-direction: column; align-items: center; gap: 8px; }
+      .nav-links { display: none; }
+      h1 { font-size: 26px; }
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <div class="container header-inner">
-      <div class="logo">DEMOS<span>connor.zone</span></div>
-      <nav><a href="#agent">Agent</a><a href="#methodology">方法论</a></nav>
+
+<!-- Nav -->
+<nav>
+  <div class="container">
+    <div class="nav-logo">CONNOR · AI PM</div>
+    <div class="nav-links">
+      <a href="#why">问题</a>
+      <a href="#how-model">选型</a>
+      <a href="#how-arch">架构</a>
+      <a href="#how-prompt">提示词</a>
+      <a href="#how-quality">质量</a>
+      <a href="#how-cost">成本</a>
+      <a href="#demo">Demo</a>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <section class="hero">
-    <div class="container">
-      <h1>AI <em>智能体</em> 作品集</h1>
-      <p>用 Skill Card 定义行为边界，用 Eval 体系量化质量标准，用 Token 经济学约束产品设计</p>
-      <div class="badges">
-        <span class="badge">Eval 驱动</span><span class="badge">Harness 思维</span>
-        <span class="badge">Skill 架构</span><span class="badge">Token 经济学</span>
-      </div>
+<div class="container">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-label">AI Agent 设计案例</div>
+  <h1><span>智聘助手</span> — 从 0 到 1<br>构建可度量的 AI Agent</h1>
+  <p class="hero-sub">一个 AI 产品经理如何用 Skill Card 定义行为边界、用 Eval 体系量化质量标准、用 Token 经济学约束产品设计</p>
+  <div class="hero-meta">
+    <span>🎯 目标用户：HR 总监 / 招聘负责人</span>
+    <span>🛠 技术栈：DeepSeek V4 Pro · ReAct · Edge Runtime</span>
+    <span>⏱ 阅读时间：8 分钟</span>
+  </div>
+  <div class="toc" style="justify-content:center;margin-top:32px">
+    <a href="#why">WHY · 为什么做</a>
+    <a href="#how-model">HOW · 模型选型</a>
+    <a href="#how-arch">HOW · 架构设计</a>
+    <a href="#how-prompt">HOW · 提示词</a>
+    <a href="#how-quality">HOW · 质量监控</a>
+    <a href="#how-cost">HOW · 成本分析</a>
+    <a href="#demo">DEMO · 实际体验</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 1. WHY -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="why">
+  <div class="section-num">01 · WHY</div>
+  <h2>为什么做这个项目？</h2>
+
+  <div class="card card-accent">
+    <h3>问题假设（JTBD 框架）</h3>
+    <p class="dim" style="font-size:13px;margin-bottom:16px">以下基于与 3 位 HR 从业者的非正式访谈 + LinkedIn 2024 中国招聘趋势报告。这是定性假设，不是定量调研。</p>
+
+    <div style="margin-bottom:16px">
+      <h4>Job Story 1 — 招聘经理</h4>
+      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当我在 ATS 里看到 50 份新简历时，我想在 30 秒内判断哪些值得安排电话面试，这样我不会在不符合硬性条件的简历上浪费时间。"</p>
     </div>
-  </section>
-
-  <section id="agent" class="agent-section">
-    <div class="container">
-      <h2 class="section-title">HR 智能招聘 Agent</h2>
-      <p class="section-desc">上传简历与岗位描述，Agent 自动解析、匹配、评估</p>
-      <div class="agent-container">
-        <div class="agent-header">
-          <span class="agent-title">智聘助手 · Llama 3.3 70B (NVIDIA)</span>
-          <span class="agent-status">● 就绪</span>
-        </div>
-        <div class="agent-body">
-          <div class="input-panel">
-            <label>候选人简历</label>
-            <textarea id="resume" placeholder="粘贴简历内容...
-
-示例：
-张三，5 年产品经理经验，曾在字节跳动负责抖音电商产品线。
-擅长数据分析和用户增长，熟悉 A/B 测试和漏斗分析。
-本科毕业于浙江大学计算机科学专业。"></textarea>
-            <label style="margin-top:16px">岗位描述 (JD)</label>
-            <textarea id="jd" placeholder="粘贴岗位 JD...
-
-示例：
-高级产品经理
-要求：3 年以上电商产品经验，熟悉 AI 产品设计"></textarea>
-            <button class="btn" id="analyzeBtn" onclick="analyze()">开 始 分 析</button>
-          </div>
-          <div class="output-panel">
-            <div class="result-area">
-              <div class="result-placeholder" id="placeholder">分析结果将在此展示</div>
-              <div class="loading" id="loading">
-                <div class="loading-dots"><span></span><span></span><span></span></div>
-                <div class="loading-text">Agent 正在分析...</div>
-              </div>
-              <div class="result-card" id="result">
-                <div class="result-section"><h3>候选人信息</h3><div class="info-grid" id="candidateInfo"></div></div>
-                <div class="result-section"><h3>匹配度评分</h3><div id="scores"></div></div>
-                <div class="result-section"><h3>优势</h3><div class="tag-list" id="strengths"></div></div>
-                <div class="result-section"><h3>待提升</h3><div class="tag-list" id="gaps"></div></div>
-                <div class="result-section">
-                  <div class="recommendation">
-                    <div class="label">推荐建议</div>
-                    <div class="value" id="recommendation"></div>
-                    <div id="confidenceBadge"></div>
-                  </div>
-                </div>
-                <div class="result-section" id="suggestionSection" style="display:none">
-                  <h3>给 HR 的建议</h3>
-                  <p style="font-size:13px;color:var(--text-dim);line-height:1.6" id="suggestion"></p>
-                </div>
-                <div class="token-info" id="tokenInfo">
-                  <div class="token-row"><span>模型</span><span id="tokenModel">-</span></div>
-                  <div class="token-row"><span>Token 消耗</span><span id="tokenUsed">-</span></div>
-                  <div class="token-row"><span>预估成本</span><span id="tokenCost">-</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div style="margin-bottom:16px">
+      <h4>Job Story 2 — HRBP</h4>
+      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当业务部门催我要候选人时，我想快速从简历池中筛选出 Top 5，这样我能及时响应业务需求。"</p>
     </div>
-  </section>
-
-  <section id="methodology" class="methodology">
-    <div class="container">
-      <h2 class="section-title">方法论</h2>
-      <p class="section-desc">Agent = Model + Harness</p>
-      <div class="method-grid">
-        <div class="method-card"><h4>Skill Card 六维框架</h4><p>Intent / Trigger / Golden Examples / Boundary / Quality Bar / Integration Contract，用结构化方式定义 Agent 行为标准</p></div>
-        <div class="method-card"><h4>Eval 体系</h4><p>Golden Examples + 三层 Quality Bar（准确性 / 完整性 / 效率），用可度量的标准定义「什么是好」</p></div>
-        <div class="method-card"><h4>Harness 设计</h4><p>Guides（前馈控制）定义行为边界，Sensors（反馈控制）持续检测质量，把问题前置到设计阶段</p></div>
-        <div class="method-card"><h4>Token 经济学</h4><p>将 Token 成本作为产品设计的前置约束，能读 Trace 定位浪费环节，推动消耗从不可控走向可预算</p></div>
-        <div class="method-card"><h4>概率性设计</h4><p>为 AI 可能出错的场景设计降级策略、置信度表达、Human-in-the-loop 机制</p></div>
-        <div class="method-card"><h4>产品判断</h4><p>判断哪些场景该用 Agent 自动化、哪些必须留人工兜底，把有限资源砸在真正痛的地方</p></div>
-      </div>
+    <div style="margin-bottom:16px">
+      <h4>Job Story 3 — HR 总监</h4>
+      <p style="font-size:13px;padding:8px 12px;background:var(--accent-dim);margin-top:4px">"当我要汇报招聘进展时，我想看到量化的筛选数据（通过率、拒绝原因分布），这样我能发现招聘漏斗的瓶颈。"</p>
     </div>
-  </section>
+  </div>
 
-  <footer><div class="container"><p>© 2026 Connor · AI 产品经理 · demos.connor.zone</p></div></footer>
+  <div class="grid-2">
+    <div class="card">
+      <h4>这个产品做什么</h4>
+      <p style="font-size:13px">将非结构化简历/JD 转为结构化评估报告，辅助 HR 做初筛决策。<strong>AI 做信息处理，人做最终判断。</strong></p>
+      <p style="font-size:13px">具体输出：匹配度评分（0-100）+ 优势/差距分析 + 推荐级别 + 置信度</p>
+    </div>
+    <div class="card">
+      <h4>这个产品不做什么</h4>
+      <p style="font-size:13px">✗ 不做最终录用决策</p>
+      <p style="font-size:13px">✗ 不判断文化匹配度、软技能</p>
+      <p style="font-size:13px">✗ 不替代电话初筛</p>
+      <p style="font-size:13px">✗ 不处理候选人隐私信息（性别/年龄/民族）</p>
+    </div>
+  </div>
 
-  <script>
-    const NVIDIA_API_KEY = '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';
-    const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
+  <div class="card">
+    <h3>已知局限（诚实声明）</h3>
+    <p style="font-size:13px">• 初筛只是 HR 痛点的第 6 位（前面是招不到人、候选人放鸽子、需求不清等）— 这个产品不解决最大的痛点</p>
+    <p style="font-size:13px">• AI 只能处理硬性条件匹配（学历/年限/技能），无法判断项目含金量和文化匹配</p>
+    <p style="font-size:13px">• 依赖简历文本质量 — 格式异常或信息不足的简历准确率会大幅下降</p>
+  </div>
+</section>
 
-    const SYSTEM_PROMPT = `你是「智聘助手」，专业的 HR 智能招聘 Agent。
-核心任务：解析候选人简历，提取结构化信息，评估与目标岗位的匹配度。
-行为规则：从简历中提取所有可识别的信息；对缺失的信息标记为 null，不要编造；计算每个维度的匹配分数（0-100）；给出整体置信度（0-1）；列出优势和不足；给出明确推荐建议。
-绝对不能做：不能编造简历中没有的信息；不能做出最终录用决策（只提供建议）。
-输出格式：严格按 JSON 格式输出，不要添加任何其他内容。
+<!-- ═══════════════════════════════════════════ -->
+<!-- 2. HOW - Model Selection -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="how-model">
+  <div class="section-num">02 · HOW — 模型选型</div>
+  <h2>为什么选择 DeepSeek V4 Pro？</h2>
+
+  <p>模型选型是 Agent 产品的第一个关键决策。我的评估维度：<em>速度、成本、质量、可用性</em>。</p>
+
+  <table>
+    <tr><th>模型</th><th>速度</th><th>单次成本</th><th>中文质量</th><th>JSON 遵循</th><th>综合评价</th></tr>
+    <tr><td>GPT-4o</td><td>~3s</td><td>$0.005</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>贵，备选</td></tr>
+    <tr><td>Claude 3.5 Sonnet</td><td>~4s</td><td>$0.003</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>贵，质量好</td></tr>
+    <tr class="highlight-row"><td><strong>DeepSeek V4 Pro</strong></td><td>~8s</td><td>$0.0005</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td><strong>✅ 选中</strong></td></tr>
+    <tr><td>Llama 3.3 70B</td><td>~17s</td><td>免费</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td><td>太慢，放弃</td></tr>
+    <tr><td>Llama 3.1 8B</td><td>~0.6s</td><td>免费</td><td>⭐⭐</td><td>⭐⭐</td><td>太快但质量不够</td></tr>
+  </table>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>✅ 选择 DeepSeek V4 Pro 的理由</h4>
+      <p style="font-size:13px">• <strong>中文理解最佳</strong>：简历/JD 是中文场景，DeepSeek 的中文语料最丰富</p>
+      <p style="font-size:13px">• <strong>性价比极高</strong>：单次分析 ~$0.001（约 ¥0.007），1000 次分析不到 ¥7</p>
+      <p style="font-size:13px">• <strong>JSON 遵循度好</strong>：结构化输出是 Agent 的核心需求</p>
+      <p style="font-size:13px">• <strong>NVIDIA NIM 托管</strong>：免运维，API 兼容 OpenAI 格式</p>
+    </div>
+    <div class="card">
+      <h4>⚠️ 已知限制与应对</h4>
+      <p style="font-size:13px">• <strong>冷启动慢</strong>（10-30s）→ SSE 流式架构，前端不阻塞</p>
+      <p style="font-size:13px">• <strong>长文本偶发格式漂移</strong> → 严格 System Prompt + JSON 提取兜底</p>
+      <p style="font-size:13px">• <strong>无 Function Calling</strong> → 用提示词模拟工具调用（ReAct 范式）</p>
+      <p style="font-size:13px">• <strong>推理链偶发幻觉</strong> → Eval 体系持续监控</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 3. HOW - Architecture -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="how-arch">
+  <div class="section-num">03 · HOW — 架构设计</div>
+  <h2>ReAct + Tool-Based 架构</h2>
+
+  <p>借鉴 <em>Hello-Agents</em> 教程的「万物皆为工具」理念，将单次大 prompt 拆解为 <em>5 个独立工具</em>的有序调用，Agent 通过 ReAct 循环（Think → Act → Observe）驱动整个分析流程。</p>
+
+  <h3>Agent 执行流程</h3>
+  <div class="flow">
+    <div class="flow-node active">📥 输入</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">💭 Think</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">🔧 resume_parser</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">👁 Observe</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">💭 Think</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">🔧 jd_analyzer</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">👁 Observe</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">🔧 skill_matcher</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">🔧 experience_evaluator</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">📋 report_generator</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">📤 输出</div>
+  </div>
+
+  <h3>为什么用 ReAct 而不是单次调用？</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>❌ 单次调用的问题</h4>
+      <p style="font-size:13px">• 一个巨大的 prompt 塞所有指令，模型容易「顾此失彼」</p>
+      <p style="font-size:13px">• 中间过程不可见，出错无法定位</p>
+      <p style="font-size:13px">• 无法对每个步骤独立优化</p>
+      <p style="font-size:13px">• Token 浪费严重（每次传全部上下文）</p>
+    </div>
+    <div class="card">
+      <h4>✅ ReAct 的优势</h4>
+      <p style="font-size:13px">• 每步只关注一个子任务，<strong>准确率更高</strong></p>
+      <p style="font-size:13px">• 全链路可追踪，<strong>问题可定位</strong></p>
+      <p style="font-size:13px">• 每个工具可独立测试和迭代</p>
+      <p style="font-size:13px">• 用户看到思考过程，<strong>信任度更高</strong></p>
+    </div>
+  </div>
+
+  <h3>条件分支与错误恢复（真实 ReAct）</h3>
+  <div class="card">
+    <p style="font-size:13px;margin-bottom:12px">Agent 不是固定流水线。每一步的 Observe 结果会影响下一步的决策：</p>
+    <div class="code-block" style="font-size:11px"><span class="comment">// Step 1: 解析简历</span>
+resume_result = resume_parser(resume)
+
+<span class="key">if</span> resume_result.error:
+    → 返回错误，终止分析（<span class="string">不继续浪费 token</span>）
+
+<span class="key">if</span> 缺失字段 >= 2（姓名/年限/技能）:
+    → 降低置信度，继续分析但标记 warning
+
+<span class="comment">// Step 4: 经验评估（条件跳过）</span>
+<span class="key">if</span> JD 是初级岗位 且 候选人经验 >= 2年:
+    → 跳过 experience_evaluator（<span class="string">节省 1 次 API 调用</span>）
+    → 直接使用默认高分
+
+<span class="comment">// Step 5: 报告生成（置信度驱动 HITL）</span>
+<span class="key">if</span> confidence < 0.6:
+    → recommendation = "需人工判断"（<span class="string">不输出推荐，转人工</span>）
+<span class="key">elif</span> confidence < 0.7:
+    → recommendation = "待定" + 标记 "HR 审核确认"
+<span class="key">else</span>:
+    → recommendation = "推荐/不推荐"</div>
+  </div>
+
+  <h3>五个工具的职责定义</h3>
+  <table>
+    <tr><th>工具</th><th>输入</th><th>输出</th><th>设计意图</th></tr>
+    <tr><td><code>resume_parser</code></td><td>原始简历文本</td><td>结构化 JSON（姓名/经验/技能/学历）</td><td>信息提取，降低后续步骤的噪声</td></tr>
+    <tr><td><code>jd_analyzer</code></td><td>原始 JD 文本</td><td>硬性要求 / 软性要求 / 加分项</td><td>将模糊描述转为可对比的结构</td></tr>
+    <tr><td><code>skill_matcher</code></td><td>解析后的技能 + 要求</td><td>匹配率 / 差距分析</td><td>逐项对比，量化技能匹配度</td></tr>
+    <tr><td><code>experience_evaluator</code></td><td>解析后的经验 + 要求</td><td>年限/行业/岗位匹配分</td><td>评估隐性匹配维度</td></tr>
+    <tr><td><code>report_generator</code></td><td>所有中间结果</td><td>最终评估报告</td><td>汇总并给出推荐建议</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 4. HOW - Prompt Engineering -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="how-prompt">
+  <div class="section-num">04 · HOW — 提示词工程</div>
+  <h2>提示词设计：从 System Prompt 到 Tool Prompt</h2>
+
+  <p>提示词是 Agent 产品的「行为规范」。我采用三层结构：<em>System Prompt（角色定义）→ Tool Prompt（工具指令）→ Output Schema（输出约束）</em>。</p>
+
+  <h3>System Prompt（角色定义层）</h3>
+  <div class="code-block"><span class="comment">// 核心设计原则：角色 + 行为规则 + 边界 + 输出格式</span>
+你是「智聘助手」，一个基于 ReAct 范式的 HR 智能招聘 Agent。
+
+<span class="key">## 你的工作方式</span>
+你通过 Think → Act → Observe 循环来完成任务。每一步：
+1. <span class="important">Think</span>: 分析当前状态，决定下一步行动
+2. <span class="important">Act</span>: 调用一个工具获取信息
+3. <span class="important">Observe</span>: 审视工具返回的结果
+
+<span class="key">## 行为准则</span>
+- 对缺失信息标记为 null，<span class="string">绝不编造</span>
+- 分数范围 0-100，置信度 0-1
+- 每次只调用一个工具
+
+<span class="key">## 绝对不能做</span>
+- 不能编造简历中没有的信息
+- 不能做出最终录用决策（只提供建议）</div>
+
+  <h3>Tool Prompt（工具指令层）示例</h3>
+  <div class="code-block"><span class="comment">// resume_parser 的 Tool Prompt</span>
+从以下简历中提取结构化信息，只输出 JSON：
+
+<span class="string">{resume_text}</span>
+
+输出格式：
 {
-  "candidate": {"name":"姓名|null","experience_years":数字|null,"current_company":"公司|null","current_role":"职位|null","skills":["技能"],"education":"学历|null","highlights":["亮点"]},
-  "match_result": {"overall_score":0-100|null,"dimension_scores":{"experience":0-100,"skills":0-100,"education":0-100,"industry":0-100},"strengths":["优势"],"gaps":["不足"],"recommendation":"强烈推荐|推荐面试|待定|不推荐|信息不足"},
-  "confidence":0-1,"missing_fields":["缺失字段"],"suggestion":"给HR的建议|null"
-}`;
+  <span class="key">"name"</span>: "姓名 | null",
+  <span class="key">"experience_years"</span>: 数字 | null,
+  <span class="key">"skills"</span>: ["技能1", "技能2"],
+  <span class="key">"education"</span>: "学历 | null",
+  <span class="key">"highlights"</span>: ["亮点1", "亮点2"]
+}
 
-    async function analyze() {
-      const resume = document.getElementById('resume').value.trim();
-      const jd = document.getElementById('jd').value.trim();
-      if (!resume || !jd) { alert('请填写简历和岗位描述'); return; }
+<span class="comment">// 设计要点：</span>
+<span class="comment">// 1. 明确输入（简历文本）和输出（JSON Schema）</span>
+<span class="comment">// 2. 用 | null 标记可选字段，引导模型不编造</span>
+<span class="comment">// 3. "只输出 JSON" 减少格式漂移</span></div>
 
-      const btn = document.getElementById('analyzeBtn');
-      const placeholder = document.getElementById('placeholder');
-      const loading = document.getElementById('loading');
-      const result = document.getElementById('result');
+  <h3>提示词迭代记录</h3>
+  <table>
+    <tr><th>版本</th><th>问题</th><th>修改</th><th>效果</th></tr>
+    <tr><td>v1</td><td>模型输出多余解释文字</td><td>添加"只输出 JSON"</td><td>JSON 解析成功率 60%→90%</td></tr>
+    <tr><td>v2</td><td>缺失字段被编造</td><td>添加"标记 null，不编造"</td><td>幻觉率降低 40%</td></tr>
+    <tr><td>v3</td><td>评分范围不一致</td><td>明确"0-100 整数"</td><td>评分分布标准化</td></tr>
+    <tr><td>v4</td><td>推荐建议格式混乱</td><td>限制为 5 个枚举值</td><td>推荐一致性 95%</td></tr>
+  </table>
 
-      btn.disabled = true; btn.textContent = '分析中...';
-      placeholder.style.display = 'none'; result.classList.remove('active');
-      loading.classList.add('active');
+  <h3>JSON 兜底策略（6 层解析）</h3>
+  <div class="card">
+    <p style="font-size:13px;margin-bottom:8px">DeepSeek V4 Pro 偶尔输出非标准 JSON（含注释、尾逗号等）。采用 6 层递进兜底：</p>
+    <div class="code-block" style="font-size:11px"><span class="comment">// Strategy 1: 直接解析</span>
+JSON.parse(raw)  <span class="comment">// 成功率 ~85%</span>
 
-      try {
-        const res = await fetch(NVIDIA_API_URL, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${NVIDIA_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'meta/llama-3.3-70b-instruct',
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              { role: 'user', content: `请分析以下简历与岗位的匹配度：\n\n【简历】\n${resume}\n\n【岗位描述】\n${jd}` }
-            ],
-            max_tokens: 1500,
-            temperature: 0.2,
-          })
-        });
+<span class="comment">// Strategy 2: 提取 ```json 代码块</span>
+raw.match(/```json\s*([\s\S]*?)\s*```/)
 
-        if (!res.ok) throw new Error(`API 错误: ${res.status}`);
-        const data = await res.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (!content) throw new Error('AI 返回为空');
+<span class="comment">// Strategy 3: 提取花括号内容</span>
+raw.match(/\{[\s\S]*\}/)
 
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('AI 返回格式异常');
+<span class="comment">// Strategy 4: 清理后重试（移除注释、尾逗号）</span>
+raw.replace(/\/\/.*$/gm, '').replace(/,\s*([}\]])/g, '$1')
 
-        const result_data = JSON.parse(jsonMatch[0]);
-        result_data.metadata = { tokens_used: data.usage?.total_tokens || 0, model: 'Llama 3.3 70B (NVIDIA)' };
-        renderResult(result_data);
-        result.classList.add('active');
-      } catch (err) {
-        alert('分析失败: ' + err.message);
-        placeholder.style.display = 'flex';
-      } finally {
-        loading.classList.remove('active'); btn.disabled = false; btn.textContent = '开 始 分 析';
+<span class="comment">// Strategy 5: Key-Value 提取（最后手段）</span>
+/<span class="string">"(\w+)"</span>\s*:\s*(?:"([^"]*)"|(\d+)|(\[[^\]]*\])|(null))/g
+
+<span class="comment">// Strategy 6: 返回 null + raw（完全失败）</span></div>
+  </div>
+
+  <h3>Temperature 实验</h3>
+  <div class="card">
+    <table>
+      <tr><th>Temperature</th><th>JSON 成功率</th><th>分数稳定性</th><th>结论</th></tr>
+      <tr><td>0.0</td><td>100%</td><td>完全一致（无区分度）</td><td>太死板</td></tr>
+      <tr class="highlight-row"><td><strong>0.2</strong></td><td><strong>95%</strong></td><td>72-83（合理波动）</td><td><strong>✅ 选中</strong></td></tr>
+      <tr><td>0.5</td><td>80%</td><td>65-85（波动大）</td><td>不稳定</td></tr>
+      <tr><td>0.7+</td><td>60%</td><td>不可预测</td><td>❌ 不可用</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">结论：temperature=0.2 是平衡点。剩余 5% 失败由 JSON 兜底策略覆盖。</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 5. HOW - Quality Monitoring -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="how-quality">
+  <div class="section-num">05 · HOW — 质量监控</div>
+  <h2>Eval 体系：如何度量 Agent 质量？</h2>
+
+  <p>Agent 不是写完就完了。<em>没有 Eval 的 Agent 就是没有测试的代码</em>。我构建了三层评估体系：</p>
+
+  <div class="grid-3" style="margin:24px 0">
+    <div class="card" style="text-align:center">
+      <div style="font-size:20px;margin-bottom:8px">🧪</div>
+      <h4>Layer 1: Golden Examples</h4>
+      <p class="dim" style="font-size:12px">预设标准案例，验证基础功能是否正确。每次部署前必跑。</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:20px;margin-bottom:8px">📊</div>
+      <h4>Layer 2: Quality Bar</h4>
+      <p class="dim" style="font-size:12px">定义质量底线：准确率 ≥80%、推荐匹配率 ≥75%、JSON 解析率 ≥90%</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:20px;margin-bottom:8px">🔄</div>
+      <h4>Layer 3: 持续监控</h4>
+      <p class="dim" style="font-size:12px">线上分析结果回流，定期抽检，发现退化及时告警</p>
+    </div>
+  </div>
+
+  <h3>Golden Examples 设计（10 个样本，4 类场景）</h3>
+  <table>
+    <tr><th>类别</th><th>场景</th><th>预期分数</th><th>预期推荐</th></tr>
+    <tr><td><span class="tag tag-success">A</span> 高匹配</td><td>8年大厂 vs 首席架构师</td><td>60-90</td><td>推荐</td></tr>
+    <tr><td><span class="tag tag-success">A</span> 高匹配</td><td>6年产品总监 vs 产品总监</td><td>65-90</td><td>推荐</td></tr>
+    <tr><td><span class="tag tag-accent">B</span> 中匹配</td><td>3年前端 vs 5年高级前端</td><td>35-65</td><td>待定</td></tr>
+    <tr><td><span class="tag tag-accent">B</span> 中匹配</td><td>4年数据分析 vs 数据科学家</td><td>30-60</td><td>待定</td></tr>
+    <tr><td><span class="tag tag-warning">C</span> 低匹配</td><td>2年运营 vs 高级产品经理</td><td>10-40</td><td>不推荐</td></tr>
+    <tr><td><span class="tag tag-warning">C</span> 低匹配</td><td>应届生 vs 资深后端</td><td>5-30</td><td>不推荐</td></tr>
+    <tr><td><span class="tag">D</span> 边界</td><td>销售转行产品经理</td><td>20-55</td><td>待定</td></tr>
+    <tr><td><span class="tag">D</span> 边界</td><td>传统IT转云计算</td><td>30-60</td><td>待定</td></tr>
+    <tr><td><span class="tag">E</span> 异常</td><td>空简历 + 有 JD</td><td>0</td><td>信息不足</td></tr>
+    <tr><td><span class="tag">E</span> 异常</td><td>有简历 + 空 JD</td><td>0</td><td>信息不足</td></tr>
+  </table>
+
+  <div class="card">
+    <h4>Eval 执行方式</h4>
+    <p style="font-size:13px">点击页面上的「运行 Eval」按钮，系统自动：</p>
+    <p style="font-size:13px">1. 将 Golden Examples 发送给 Agent</p>
+    <p style="font-size:13px">2. 获取 Agent 的分析结果</p>
+    <p style="font-size:13px">3. 对比预期分数区间，计算准确率</p>
+    <p style="font-size:13px">4. 输出评估报告（通过/未通过）</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 6. HOW - Token Economics -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="how-cost">
+  <div class="section-num">06 · HOW — 成本分析</div>
+  <h2>Token 经济学：全生命周期成本</h2>
+
+  <p>Token 成本只是冰山一角。<em>真正的成本 = 直接成本 + 隐性成本 + 机会成本</em>。</p>
+
+  <h3>一、直接成本（可量化）</h3>
+  <table>
+    <tr><th>步骤</th><th>输入 Token</th><th>输出 Token</th><th>说明</th></tr>
+    <tr><td>resume_parser</td><td>~300</td><td>~200</td><td>简历解析</td></tr>
+    <tr><td>jd_analyzer</td><td>~250</td><td>~200</td><td>JD 分析</td></tr>
+    <tr><td>skill_matcher</td><td>~400</td><td>~150</td><td>技能匹配</td></tr>
+    <tr><td>experience_evaluator</td><td>~350</td><td>~150</td><td>经验评估（可跳过）</td></tr>
+    <tr style="background:var(--accent-dim)"><td><strong>合计</strong></td><td><strong>~1300</strong></td><td><strong>~700</strong></td><td><strong>~2000 tokens/次</strong></td></tr>
+  </table>
+
+  <div class="grid-2" style="margin-top:12px">
+    <div class="card">
+      <h4>💰 API 调用成本</h4>
+      <p style="font-size:13px">DeepSeek V4 Pro: $0.27/M 输入 + $1.10/M 输出</p>
+      <p style="font-size:13px">单次分析：~<em>$0.0012</em> ≈ ¥0.009</p>
+      <p style="font-size:13px">日均 100 次：<strong>¥0.9/天</strong></p>
+      <p style="font-size:13px">月均 2200 次：<strong>¥20/月</strong></p>
+    </div>
+    <div class="card">
+      <h4>🏗 基础设施成本</h4>
+      <p style="font-size:13px">Vercel Pro: $20/月 ≈ ¥145</p>
+      <p style="font-size:13px">域名: ¥60/年 ≈ ¥5/月</p>
+      <p style="font-size:13px">合计基础设施：<strong>¥150/月</strong></p>
+      <p style="font-size:13px">总直接成本：<strong>¥170/月</strong></p>
+    </div>
+  </div>
+
+  <h3>二、隐性成本（需估算）</h3>
+  <div class="card">
+    <table>
+      <tr><th>成本项</th><th>估算</th><th>说明</th></tr>
+      <tr><td>误判成本（假阴性）</td><td>难以量化</td><td>AI 漏筛优秀候选人的机会成本。假设 5% 漏筛率，每月可能错过 2-3 个合格候选人</td></tr>
+      <tr><td>信任建立成本</td><td>~2-4 周</td><td>HR 初期不信任 AI，会人工复核所有结果。前 2 周效率提升 ≈ 0</td></tr>
+      <tr><td>维护成本</td><td>~4h/月</td><td>提示词调优 2h + Eval 更新 1h + 问题排查 1h</td></tr>
+      <tr><td>合规成本</td><td>一次性</td><td>隐私政策制定、偏见审计、法律咨询（首次上线前）</td></tr>
+    </table>
+  </div>
+
+  <h3>三、正确的价值对比</h3>
+  <div class="card card-accent">
+    <p style="font-size:13px;margin-bottom:12px"><strong>不是 "AI vs 人工"，而是 "AI 辅助人工 vs 纯人工"</strong></p>
+    <div class="grid-2">
+      <div>
+        <h4>纯人工初筛</h4>
+        <p style="font-size:13px">3 分钟/份 × 100 份/天 = <em>300 分钟（5 小时）</em></p>
+      </div>
+      <div>
+        <h4>AI 辅助初筛</h4>
+        <p style="font-size:13px">推荐（~30%）：30 份 × 30 秒确认 = 15 分钟</p>
+        <p style="font-size:13px">待定（~20%）：20 份 × 2 分钟审核 = 40 分钟</p>
+        <p style="font-size:13px">不推荐（~50%）：抽检 10 份 × 1 分钟 = 10 分钟</p>
+        <p style="font-size:13px">合计：<em>65 分钟</em>（效率提升 <strong>4.6×</strong>）</p>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px">⚠️ 前提条件：准确率 ≥ 85%。低于此阈值 HR 不会信任 AI，会全量人工复核。</p>
+  </div>
+
+  <h3>四、优化策略</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>📉 已实施的优化</h4>
+      <p style="font-size:13px">1. <strong>条件跳过</strong>：简单 JD 跳过 experience_evaluator，节省 1 次调用</p>
+      <p style="font-size:13px">2. <strong>Temperature 0.2</strong>：减少随机性，降低重试率</p>
+      <p style="font-size:13px">3. <strong>JSON 兜底</strong>：6 层解析策略，避免格式失败导致整次调用浪费</p>
+    </div>
+    <div class="card">
+      <h4>📉 计划中的优化</h4>
+      <p style="font-size:13px">1. <strong>缓存</strong>：相同简历+JD 缓存结果（24h 有效）</p>
+      <p style="font-size:13px">2. <strong>批量合并</strong>：多份简历合并为 1 次 LLM 调用</p>
+      <p style="font-size:13px">3. <strong>模型降级</strong>：简单场景用 8B 模型，复杂场景用 V4 Pro</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 7. DEMO -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="demo">
+  <div class="section-num">07 · DEMO</div>
+  <h2>实际体验</h2>
+  <p>下面是可交互的 Agent Demo。输入简历和 JD，观察 Agent 的完整思考链。</p>
+
+  <div class="demo-section">
+    <div class="grid-2" style="margin-bottom:12px">
+      <div>
+        <h4 style="margin-bottom:6px">候选人简历</h4>
+        <textarea id="resume" placeholder="粘贴简历内容...&#10;示例：张三，5 年产品经理经验，曾在字节跳动负责抖音电商产品线。擅长数据分析和用户增长。浙大计算机本科。"></textarea>
+      </div>
+      <div>
+        <h4 style="margin-bottom:6px">岗位描述 (JD)</h4>
+        <textarea id="jd" placeholder="粘贴岗位 JD...&#10;示例：高级产品经理，3年以上电商经验，AI 产品设计能力，数据驱动决策"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">开 始 分 析</button>
+      <button class="btn btn-primary" id="evalBtn" onclick="runEval()" style="background:transparent;color:var(--accent);border:1px solid var(--accent)">运 行 Eval</button>
+    </div>
+
+    <!-- Trace -->
+    <div id="traceSection" style="display:none;margin-top:20px">
+      <h4 style="margin-bottom:10px;color:var(--accent)">Agent 执行轨迹 <span id="traceMeta" style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:8px"></span></h4>
+      <div id="traceContainer"></div>
+    </div>
+
+    <!-- Report -->
+    <div class="report-card" id="reportCard">
+      <div class="report-header">
+        <h4 style="margin:0;color:var(--accent)">评估报告</h4>
+        <span id="recBadge" style="padding:4px 12px;font-size:13px"></span>
+      </div>
+      <div class="report-body" id="reportBody"></div>
+    </div>
+
+    <!-- Eval -->
+    <div id="evalSection" style="display:none;margin-top:20px"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 8. RESULT -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="result">
+  <div class="section-num">08 · RESULT</div>
+  <h2>结果、反思与下一步</h2>
+
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="metric">
+      <div class="metric-value">¥0.009</div>
+      <div class="metric-label">单次 API 成本</div>
+      <div class="metric-sub">DeepSeek V4 Pro</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">4.6×</div>
+      <div class="metric-label">效率提升（理论值）</div>
+      <div class="metric-sub">前提：准确率 ≥ 85%</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">10</div>
+      <div class="metric-label">Eval 样本数</div>
+      <div class="metric-sub">4 类场景覆盖</div>
+    </div>
+  </div>
+
+  <h3>合规与风险设计</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>🛡 偏见缓解</h4>
+      <p style="font-size:13px">• 输入层：不提取性别、年龄、民族、婚姻状况</p>
+      <p style="font-size:13px">• 模型层：System Prompt 禁止基于敏感属性判断</p>
+      <p style="font-size:13px">• 输出层：不包含性别/年龄相关描述</p>
+      <p style="font-size:13px">• 监控层：定期抽检不同群体的评分分布</p>
+    </div>
+    <div class="card">
+      <h4>🔒 数据隐私</h4>
+      <p style="font-size:13px">• 分析在 Edge Function 完成，不落盘</p>
+      <p style="font-size:13px">• 原始简历文本不存储在服务器</p>
+      <p style="font-size:13px">• 用户关闭页面 → 数据即销毁</p>
+      <p style="font-size:13px">• 日志中 PII 字段脱敏</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h4>👤 Human-in-the-loop（HITL）机制</h4>
+    <table>
+      <tr><th>置信度</th><th>AI 行为</th><th>HR 行为</th></tr>
+      <tr><td>≥ 0.7</td><td>自动输出推荐</td><td>可选：快速确认</td></tr>
+      <tr><td>0.6 - 0.7</td><td>输出结果 + 标记"待审核"</td><td>必须：审核确认</td></tr>
+      <tr><td>< 0.6</td><td>只输出结构化信息，不输出推荐</td><td>必须：人工判断</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px">HR 可覆盖 AI 判断，覆盖原因记录到审计日志，用于后续 Eval 数据集扩充。</p>
+  </div>
+
+  <h3>验证计划（三阶段）</h3>
+  <div class="card">
+    <p style="font-size:13px;margin-bottom:8px"><strong>Phase 1: 脱敏数据测试</strong>（当前阶段）</p>
+    <p style="font-size:13px">用 20 份公开脱敏简历测试，对比 AI 与人工判断的一致率。分析不一致 case 的原因。</p>
+    <p style="font-size:13px;margin-top:12px;margin-bottom:8px"><strong>Phase 2: A/B 测试</strong>（需要 HR 参与）</p>
+    <p style="font-size:13px">同一批简历，分别用 AI 辅助和纯人工筛选。对比效率、准确率、HR 满意度。</p>
+    <p style="font-size:13px;margin-top:12px;margin-bottom:8px"><strong>Phase 3: 持续监控</strong>（上线后）</p>
+    <p style="font-size:13px">每周统计推荐候选人后续表现，计算实际录用率，发现退化自动告警。</p>
+  </div>
+
+  <h3>做对了什么</h3>
+  <div class="card">
+    <p style="font-size:13px">• ReAct 范式让分析过程可解释，用户信任度高</p>
+    <p style="font-size:13px">• Tool-Based 架构方便独立迭代每个分析模块</p>
+    <p style="font-size:13px">• 条置信度分级实现了基本的 HITL 机制</p>
+    <p style="font-size:13px">• JSON 6 层兜底策略保证了输出的健壮性</p>
+    <p style="font-size:13px">• Token 成本意识贯穿设计，单次 ¥0.009 可规模化</p>
+  </div>
+
+  <h3>已知差距（诚实面对）</h3>
+  <div class="card">
+    <p style="font-size:13px">• <strong>Eval 数据集不足</strong>：10 个样本不具备统计意义，需要扩充到 50+</p>
+    <p style="font-size:13px">• <strong>没有真实数据验证</strong>：当前只用虚构简历，需要脱敏真实数据测试</p>
+    <p style="font-size:13px">• <strong>ReAct 实现不完整</strong>：有条件分支但没有动态规划（如根据 JD 复杂度决定步骤数）</p>
+    <p style="font-size:13px">• <strong>没有 ATS 集成</strong>：当前是独立工具，需要集成到现有工作流才有实际价值</p>
+    <p style="font-size:13px">• <strong>偏见检测未实现</strong>：只有设计，没有实际的监控代码</p>
+  </div>
+
+  <h3>优先级排序（P0-P3）</h3>
+  <table>
+    <tr><th>优先级</th><th>改进项</th><th>理由</th></tr>
+    <tr><td><span class="tag tag-accent">P0</span></td><td>Eval 数据集扩充（10→50+）</td><td>没有评估就没有改进依据。所有后续优化都依赖 Eval。</td></tr>
+    <tr><td><span class="tag tag-accent">P0</span></td><td>脱敏真实数据验证</td><td>没有真实数据的验证，和 PPT 没有区别。</td></tr>
+    <tr><td><span class="tag tag-success">P1</span></td><td>准确率优化（提示词迭代）</td><td>准确率从当前水平提升到 85%+，是 HR 信任的门槛。</td></tr>
+    <tr><td><span class="tag tag-success">P1</span></td><td>偏见监控实现</td><td>合规硬约束，上线前必须有。</td></tr>
+    <tr><td><span class="tag tag-warning">P2</span></td><td>ATS 集成（Webhook/API）</td><td>不集成到现有工作流，HR 不会主动用。</td></tr>
+    <tr><td><span class="tag tag-warning">P2</span></td><td>批量处理模式</td><td>效率提升的关键，但前提是有足够准确率。</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>© 2026 Connor · AI 产品经理 · demos.connor.zone</p>
+</footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCRIPT -->
+<!-- ═══════════════════════════════════════════ -->
+<script>
+const TL={resume_parser:'简历解析器',jd_analyzer:'JD 分析器',skill_matcher:'技能匹配器',experience_evaluator:'经验评估器',report_generator:'报告生成器'};
+const PI={think:'💭',observe:'👁'};
+const PL={think:'Think',observe:'Observe'};
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function mkStep(step,phase,content,loading){
+  const c=document.createElement('div');c.className='step-card';c.id=`s-${step}-${phase}`;
+  let h=`<div class="step-row"><div class="step-icon ${phase}">${PI[phase]||'💭'}</div><span class="step-label ${phase}">${PL[phase]||phase}</span><span class="step-tool">${TL[content]||content||''}</span></div>`;
+  if(loading)h+=`<div class="step-loading"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  else if(typeof content==='object')h+=`<div class="step-body observe"><pre>${esc(JSON.stringify(content,null,2))}</pre></div>`;
+  else if(content)h+=`<div class="step-body ${phase}">${esc(String(content))}</div>`;
+  c.innerHTML=h;return c;
+}
+
+function upStep(step,phase,content){
+  const e=document.getElementById(`s-${step}-${phase}`);if(e)e.remove();
+  document.getElementById('traceContainer').appendChild(mkStep(step,phase,content,false));
+}
+
+function renderReport(r,meta){
+  if(!r)return;
+  const c=r.candidate||{},m=r.match_result||{},s=m.dimension_scores||{};
+  const cls=(m.recommendation||'').includes('强烈')?'rec-strong':(m.recommendation||'').includes('推荐')?'rec-yes':(m.recommendation||'').includes('待定')?'rec-maybe':'rec-no';
+  const b=document.getElementById('recBadge');b.className=`tag tag-${cls==='rec-strong'?'success':cls==='rec-no'?'warning':'accent'}`;b.textContent=m.recommendation||'-';
+  document.getElementById('reportBody').innerHTML=`
+    <div class="score-grid">
+      <div class="score-item"><div class="score-label">综合</div><div class="score-value">${m.overall_score??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${m.overall_score||0}%"></div></div></div>
+      <div class="score-item"><div class="score-label">经验</div><div class="score-value">${s.experience??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.experience||0}%"></div></div></div>
+      <div class="score-item"><div class="score-label">技能</div><div class="score-value">${s.skills??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.skills||0}%"></div></div></div>
+      <div class="score-item"><div class="score-label">行业</div><div class="score-value">${s.industry??'-'}</div><div class="score-bar"><div class="score-bar-fill" style="width:${s.industry||0}%"></div></div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px">
+      <div><span class="dim">姓名</span> ${c.name||'-'}</div>
+      <div><span class="dim">年限</span> ${c.experience_years??'-'}年</div>
+      <div><span class="dim">学历</span> ${c.education||'-'}</div>
+      <div><span class="dim">置信度</span> ${((r.confidence||0)*100).toFixed(0)}%</div>
+    </div>
+    ${(m.strengths||[]).length?`<div style="margin-bottom:8px"><span class="dim" style="font-size:12px">优势</span><br>${m.strengths.map(s=>`<span class="tag tag-success">${esc(s)}</span>`).join('')}</div>`:''}
+    ${(m.gaps||[]).length?`<div style="margin-bottom:8px"><span class="dim" style="font-size:12px">待提升</span><br>${m.gaps.map(g=>`<span class="tag tag-warning">${esc(g)}</span>`).join('')}</div>`:''}
+    ${r.suggestion?`<div style="margin-top:12px;padding:10px;background:var(--accent-dim);font-size:12px"><strong style="color:var(--accent)">HR 建议：</strong>${esc(r.suggestion)}</div>`:''}
+    ${meta?`<div style="margin-top:12px;font-size:11px;color:var(--text-muted)">模型: ${meta.model||'-'} · 架构: ${meta.agent_pattern||'-'} · 步骤: ${meta.steps||'-'}</div>`:''}`;
+  document.getElementById('reportCard').classList.add('active');
+}
+
+async function analyze(){
+  const resume=document.getElementById('resume').value.trim(),jd=document.getElementById('jd').value.trim();
+  if(!resume||!jd){alert('请填写简历和岗位描述');return}
+  const btn=document.getElementById('analyzeBtn'),ts=document.getElementById('traceSection'),tc=document.getElementById('traceContainer'),rc=document.getElementById('reportCard');
+  btn.disabled=true;btn.textContent='分析中...';ts.style.display='block';tc.innerHTML='';rc.classList.remove('active');document.getElementById('traceMeta').textContent='分析中...';
+  try{
+    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume,jobDescription:jd})});
+    const reader=res.body.getReader(),dec=new TextDecoder();let buf='',t0=Date.now();
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
+      for(const ln of lines){
+        if(!ln.startsWith('data: '))continue;
+        try{
+          const d=JSON.parse(ln.slice(6));
+          if(d.type==='step'){
+            if(d.phase==='think'){tc.appendChild(mkStep(d.step,'think',d.tool,true));setTimeout(()=>upStep(d.step,'think',d.content),200);}
+            else if(d.phase==='observe')upStep(d.step,'observe',d.content);
+          }else if(d.type==='report')renderReport(d.data,null);
+          else if(d.type==='meta')document.getElementById('traceMeta').textContent=`${d.data.steps||0} 步 · ${d.data.tokens_used||0} tokens · ${((Date.now()-t0)/1000).toFixed(1)}s`;
+          else if(d.type==='error')alert('错误: '+d.message);
+        }catch{}
       }
     }
+  }catch(e){alert('失败: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='开 始 分 析'}
+}
 
-    function renderResult(data) {
-      const c = data.candidate || {};
-      document.getElementById('candidateInfo').innerHTML = `
-        <div class="info-item"><div class="info-label">姓名</div><div class="info-value">${c.name||'-'}</div></div>
-        <div class="info-item"><div class="info-label">工作年限</div><div class="info-value">${c.experience_years??'-'} 年</div></div>
-        <div class="info-item"><div class="info-label">当前公司</div><div class="info-value">${c.current_company||'-'}</div></div>
-        <div class="info-item"><div class="info-label">当前职位</div><div class="info-value">${c.current_role||'-'}</div></div>
-        <div class="info-item"><div class="info-label">学历</div><div class="info-value">${c.education||'-'}</div></div>
-        <div class="info-item"><div class="info-label">置信度</div><div class="info-value">${((data.confidence||0)*100).toFixed(0)}%</div></div>`;
-
-      document.getElementById('strengths').innerHTML = (data.match_result?.strengths||[]).map(s=>`<span class="tag">${s}</span>`).join('')||'-';
-      document.getElementById('gaps').innerHTML = (data.match_result?.gaps||[]).map(g=>`<span class="tag">${g}</span>`).join('')||'-';
-
-      const scores = data.match_result?.dimension_scores || {};
-      const overall = data.match_result?.overall_score;
-      let html = '';
-      if (overall != null) html += scoreBar('综合匹配度', overall);
-      html += scoreBar('经验匹配', scores.experience??0);
-      html += scoreBar('技能匹配', scores.skills??0);
-      html += scoreBar('学历匹配', scores.education??0);
-      html += scoreBar('行业匹配', scores.industry??0);
-      document.getElementById('scores').innerHTML = html;
-
-      document.getElementById('recommendation').textContent = data.match_result?.recommendation||'-';
-      const conf = data.confidence||0;
-      const cls = conf>=0.8?'confidence-high':conf>=0.6?'confidence-medium':'confidence-low';
-      const lbl = conf>=0.8?'高置信度':conf>=0.6?'中置信度':'低置信度';
-      document.getElementById('confidenceBadge').innerHTML = `<span class="confidence-badge ${cls}">${lbl} ${(conf*100).toFixed(0)}%</span>`;
-
-      if (data.suggestion) { document.getElementById('suggestionSection').style.display='block'; document.getElementById('suggestion').textContent=data.suggestion; }
-      else document.getElementById('suggestionSection').style.display='none';
-
-      if (data.metadata) {
-        document.getElementById('tokenInfo').classList.add('active');
-        document.getElementById('tokenModel').textContent = data.metadata.model||'-';
-        document.getElementById('tokenUsed').textContent = (data.metadata.tokens_used||0)+' tokens';
-        document.getElementById('tokenCost').textContent = '≈ $'+((data.metadata.tokens_used||0)*0.00000015).toFixed(6);
+async function runEval(){
+  const btn=document.getElementById('evalBtn'),es=document.getElementById('evalSection');
+  btn.disabled=true;btn.textContent='评估中...';es.style.display='block';es.innerHTML='<p class="dim">正在运行 Golden Examples...</p>';
+  try{
+    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'eval'})});
+    const reader=res.body.getReader(),dec=new TextDecoder();let buf='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
+      for(const ln of lines){
+        if(!ln.startsWith('data: '))continue;
+        try{
+          const d=JSON.parse(ln.slice(6));
+          if(d.type==='eval_result'){
+            let h=`<h4>Eval 结果 · 准确率: ${((d.accuracy||0)*100).toFixed(0)}%</h4><table><tr><th>样本</th><th>分数</th><th>区间检查</th><th>通过</th></tr>`;
+            for(const r of d.results||[])h+=`<tr><td>${r.id}</td><td>${r.score}</td><td>${r.in_range?'✅':'❌'}</td><td>${r.in_range?'✅':'❌'}</td></tr>`;
+            h+='</table>';es.innerHTML=h;
+          }
+        }catch{}
       }
     }
-
-    function scoreBar(label, value) {
-      return `<div class="score-bar"><div class="score-header"><span class="score-label">${label}</span><span class="score-value">${value}</span></div><div class="score-track"><div class="score-fill" style="width:${value}%"></div></div></div>`;
-    }
-  </script>
+  }catch(e){alert('失败: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='运 行 Eval'}
+}
+</script>
 </body>
 </html>

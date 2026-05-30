@@ -270,36 +270,8 @@
   <div class="section-num">04 · 实际体验</div>
   <h2>Demo：JD Copilot 对话式需求收集</h2>
 
-  <div class="chat-container">
-    <div class="chat-header">
-      <h3>JD Copilot · Plan-and-Solve + Reflection</h3>
-      <span class="chat-status">● 就绪</span>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg">
-        <div class="msg-avatar ai">AI</div>
-        <div class="msg-content">
-          <p>你好！我是 JD Copilot，帮你把模糊的岗位需求变成靠谱的 JD。</p>
-          <p>请告诉我：<strong>你需要招聘什么岗位？</strong>可以只说一个职位名称。</p>
-        </div>
-      </div>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="输入岗位需求，如：前端工程师" />
-      <button id="sendBtn" onclick="sendMessage()">发送</button>
-    </div>
-  </div>
-
-  <div class="quick-btns" id="quickBtns">
-    <button class="quick-btn" onclick="quickSend('前端工程师')">前端工程师</button>
-    <button class="quick-btn" onclick="quickSend('产品经理')">产品经理</button>
-    <button class="quick-btn" onclick="quickSend('数据分析师')">数据分析师</button>
-    <button class="quick-btn" onclick="quickSend('我要一个厉害的人')">模糊需求</button>
-  </div>
-
-  <div class="output-panel" id="reqDocPanel"><h4>📋 结构化需求文档</h4><pre id="reqDocContent"></pre></div>
-  <div class="output-panel" id="jdPanel"><h4>📄 JD 草稿</h4><div id="jdContent" style="font-size:12px;line-height:1.8"></div></div>
-  <div class="output-panel" id="qualityPanel"><h4>📊 质量评估报告</h4><div id="qualityContent"></div></div>
+  <!-- React 挂载点 - 使用 @ant-design/x 组件 -->
+  <div id="chat-demo-root"></div>
 </section>
 
 <!-- ARCHITECTURE -->
@@ -467,92 +439,6 @@
 
 </div>
 
-<script>
-const FLOWS={
-  '前端工程师':{questions:[
-    {q:'好的，前端工程师。这个岗位主要负责什么项目？C 端产品、B 端后台、还是内部工具？'},
-    {q:'团队现在几个人？这个前端在团队中是什么角色？独立负责还是协作？'},
-    {q:'技术栈有要求吗？React、Vue、Angular？有没有必须具备的技能？'},
-    {q:'薪资范围大概是多少？有没有什么绝对不要的特征？'}
-  ],reqDoc:{title:'前端工程师',hard_requirements:['3年以上前端开发经验','React 精通','TypeScript 熟练','本科及以上学历'],soft_requirements:['有大厂经验优先','有团队管理经验加分'],nice_to_have:['有开源贡献','有 Node.js 全栈经验'],exclude:['频繁跳槽（2年内换3份工作）'],salary_range:'25K-40K',source:{hard:'来自对话第1-3轮',soft:'来自对话第2轮',nice:'来自行业参考'}},
-  jd:'<h3>高级前端工程师</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位经验丰富的高级前端工程师，负责核心产品的前端架构设计和开发工作。</p><p><strong>岗位职责</strong></p><ul><li>负责核心产品的前端架构设计和技术选型</li><li>主导前端工程化建设（构建工具、CI/CD、代码规范）</li><li>解决复杂技术难题（性能优化、跨浏览器兼容）</li><li>参与产品需求评审，从技术角度提供可行性建议</li><li>指导和培养初级前端工程师</li></ul><p><strong>任职要求</strong></p><ul><li>3年以上前端开发经验，精通 React 生态</li><li>熟练使用 TypeScript，有大型项目经验</li><li>熟悉前端工程化工具（Webpack/Vite、ESLint、Jest）</li><li>良好的沟通能力和团队协作精神</li><li>本科及以上学历，计算机相关专业优先</li></ul><p><strong>加分项</strong></p><ul><li>有大厂前端开发经验</li><li>有微前端架构实践经验</li><li>有开源项目贡献或技术博客</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
-  quality:{coverage:85,accuracy:78,hallucination:5,confidence:0.82}},
-
-  '产品经理':{questions:[
-    {q:'产品经理，了解。这个 PM 主要负责什么方向？C 端、B 端、还是平台型产品？'},
-    {q:'需要技术背景吗？有些岗位要求 PM 能看懂代码。'},
-    {q:'团队规模和汇报关系？独立带产品线还是协助高级 PM？'},
-    {q:'有没有行业要求？比如电商、金融、教育。'}
-  ],reqDoc:{title:'产品经理',hard_requirements:['3年以上产品经验','有完整项目上线经验','本科及以上学历'],soft_requirements:['B 端产品经验优先','有数据驱动决策能力'],nice_to_have:['技术背景','有 AI 产品经验'],exclude:['无独立负责产品经验','频繁跳槽'],salary_range:'20K-35K',source:{hard:'来自对话第1-3轮',soft:'来自对话第2轮',nice:'来自行业参考'}},
-  jd:'<h3>高级产品经理</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位资深的产品经理，负责核心产品线的规划、设计和落地。</p><p><strong>岗位职责</strong></p><ul><li>负责产品规划和路线图制定，驱动产品从 0 到 1</li><li>深入理解用户需求，输出 PRD、原型和交互设计</li><li>协调研发、设计、运营等跨团队资源</li><li>建立数据指标体系，通过数据驱动产品优化</li><li>跟踪行业趋势和竞品动态</li></ul><p><strong>任职要求</strong></p><ul><li>3年以上产品经验，有完整的项目上线经历</li><li>优秀的需求分析和文档输出能力</li><li>熟练使用数据分析工具（SQL、Excel）</li><li>良好的沟通能力和跨团队协作能力</li><li>本科及以上学历</li></ul><p><strong>加分项</strong></p><ul><li>有 B 端 SaaS 产品经验</li><li>有技术背景</li><li>有 AI 产品设计经验</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
-  quality:{coverage:82,accuracy:75,hallucination:8,confidence:0.78}},
-
-  '数据分析师':{questions:[
-    {q:'数据分析师，好的。这个岗位主要做什么？报表、用户分析、还是算法模型？'},
-    {q:'技术要求什么水平？SQL + Excel 就够，还是需要 Python/R？'},
-    {q:'需要有业务理解能力吗？能独立提出数据洞察？'}
-  ],reqDoc:{title:'数据分析师',hard_requirements:['2年以上数据分析经验','SQL 熟练','Excel/可视化工具精通'],soft_requirements:['Python/R 加分','有业务理解能力'],nice_to_have:['有机器学习基础','有 Tableau/PowerBI 经验'],exclude:['只会写 SQL 不会分析'],salary_range:'15K-25K',source:{hard:'来自对话第1轮',soft:'来自对话第2-3轮',nice:'来自行业参考'}},
-  jd:'<h3>数据分析师</h3><p><strong>岗位描述</strong></p><p>我们正在寻找一位数据分析师，负责业务数据的采集、分析和洞察，为产品和运营决策提供数据支持。</p><p><strong>岗位职责</strong></p><ul><li>负责业务数据的日常监控和异常预警</li><li>深入分析用户行为数据，输出可执行的洞察报告</li><li>搭建数据指标体系和可视化看板</li><li>支持产品和运营团队的数据需求</li><li>参与 A/B 测试设计和效果评估</li></ul><p><strong>任职要求</strong></p><ul><li>2年以上数据分析经验</li><li>精通 SQL，熟练使用 Excel</li><li>熟悉至少一种数据可视化工具</li><li>良好的逻辑思维和业务理解能力</li><li>本科及以上学历</li></ul><p><strong>加分项</strong></p><ul><li>熟练使用 Python 或 R</li><li>有机器学习基础</li><li>有行业数据分析经验</li></ul><p style="font-size:11px;color:var(--text-muted)"><em>注：标注"来自行业参考"的部分请与用人部门确认。</em></p>',
-  quality:{coverage:80,accuracy:72,hallucination:10,confidence:0.75}},
-
-  '我要一个厉害的人':{questions:[
-    {q:'理解，"厉害的人"可以有很多含义。让我帮你拆解一下。这个岗位是什么方向？技术、产品、运营？'},
-    {q:'你希望 TA 具备什么核心能力？能独立带项目？有行业资源？技术特别强？'},
-    {q:'有没有具体的行业或领域要求？'}
-  ],reqDoc:{title:'待定（需求模糊）',hard_requirements:['待确认 — 用人部门需明确岗位方向'],soft_requirements:['待确认 — 需明确核心能力要求'],nice_to_have:['待确认'],exclude:['待确认'],salary_range:'待确认',source:{hard:'⚠️ 未明确',soft:'⚠️ 未明确',nice:'⚠️ 未明确'}},
-  jd:'<h3>⚠️ 需求信息不足</h3><p>当前需求描述过于模糊，无法生成有效的 JD。</p><p><strong>建议：</strong></p><ul><li>请与用人部门确认具体的岗位方向</li><li>请明确核心能力要求</li><li>请确认薪资范围和汇报关系</li></ul><p>补充以上信息后，可以为你生成一份精准的 JD。</p>',
-  quality:{coverage:30,accuracy:0,hallucination:0,confidence:0.35}}
-};
-
-let currentFlow=null,currentStep=0;
-
-function sendMessage(){
-  const input=document.getElementById('chatInput');const text=input.value.trim();if(!text)return;input.value='';
-  addMessage('user',text);
-  if(!currentFlow){
-    const flowKey=Object.keys(FLOWS).find(k=>text.includes(k)||k.includes(text));
-    if(flowKey){currentFlow=FLOWS[flowKey];currentStep=0;document.getElementById('quickBtns').style.display='none';setTimeout(()=>askNextQuestion(),800);}
-    else{setTimeout(()=>addMessage('ai','我没有完全理解你的需求。你可以试试选择一个预设岗位，或者更具体地描述。'),500);}
-    return;
-  }
-}
-
-function quickSend(text){document.getElementById('chatInput').value=text;sendMessage();}
-
-function askNextQuestion(){
-  if(!currentFlow||currentStep>=currentFlow.questions.length){setTimeout(()=>generateOutput(),500);return;}
-  const q=currentFlow.questions[currentStep];
-  addMessage('ai',q.q);currentStep++;
-  setTimeout(()=>{if(currentStep<currentFlow.questions.length){addMessage('user','（继续回答...）');setTimeout(()=>askNextQuestion(),600);}else{addMessage('user','（信息已提供）');setTimeout(()=>generateOutput(),500);}},1500);
-}
-
-function generateOutput(){
-  addMessage('ai','好的，信息已收集完毕。现在为你生成结构化需求文档和 JD 草稿...');
-  setTimeout(()=>{
-    const reqPanel=document.getElementById('reqDocPanel');reqPanel.classList.add('active');
-    document.getElementById('reqDocContent').textContent=JSON.stringify(currentFlow.reqDoc,null,2);
-    addMessage('ai','📋 <strong>结构化需求文档</strong>已生成。');
-    setTimeout(()=>{
-      document.getElementById('jdPanel').classList.add('active');
-      document.getElementById('jdContent').innerHTML=currentFlow.jd;
-      addMessage('ai','📄 <strong>JD 草稿</strong>已生成。标注"来自行业参考"的部分请与用人部门确认。');
-      setTimeout(()=>{
-        document.getElementById('qualityPanel').classList.add('active');
-        const q=currentFlow.quality;
-        document.getElementById('qualityContent').innerHTML=`<div class="grid-4" style="text-align:center"><div><div style="font-size:18px;color:var(--accent)">${q.coverage}%</div><div style="font-size:9px;color:var(--text-dim)">需求覆盖度</div></div><div><div style="font-size:18px;color:var(--accent)">${q.accuracy}%</div><div style="font-size:9px;color:var(--text-dim)">JD 准确度</div></div><div><div style="font-size:18px;color:var(--success)">${q.hallucination}%</div><div style="font-size:9px;color:var(--text-dim)">幻觉率</div></div><div><div style="font-size:18px;color:var(--think)">${q.confidence}</div><div style="font-size:9px;color:var(--text-dim)">置信度</div></div></div><p style="font-size:10px;color:var(--text-muted);margin-top:6px">${q.confidence>=0.8?'✅ 置信度足够，可直接使用':q.confidence>=0.6?'⚠️ 建议 HR 审核后使用':'❌ 需求信息不足，建议补充后重新生成'}</p>`;
-        addMessage('ai','📊 <strong>质量评估</strong>：'+(q.confidence>=0.8?'置信度足够，JD 可直接使用。':q.confidence>=0.6?'建议 HR 审核后使用。':'需求信息不足，建议补充后重新生成。'));
-      },800);
-    },1000);
-  },1000);
-}
-
-function addMessage(role,content){
-  const container=document.getElementById('chatMessages');const msg=document.createElement('div');msg.className='msg';
-  msg.innerHTML=`<div class="msg-avatar ${role}">${role==='ai'?'AI':'HR'}</div><div class="msg-content">${content}</div>`;
-  container.appendChild(msg);container.scrollTop=container.scrollHeight;
-}
-
-document.getElementById('chatInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage();});
-</script>
+<script type="module" src="/src/chat-demo.jsx"></script>
 </body>
 </html>

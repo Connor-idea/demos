@@ -1,10 +1,15 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider, theme, Tag, Typography } from 'antd';
+import { ConfigProvider, theme, Tag, Typography, Steps, Collapse } from 'antd';
 import { Bubble, Sender, Prompts, Welcome } from '@ant-design/x';
-import { RobotOutlined, UserOutlined, LoadingOutlined } from '@ant-design/icons';
+import { 
+  RobotOutlined, UserOutlined, LoadingOutlined, 
+  BulbOutlined, ThunderboltOutlined, EyeOutlined,
+  CheckCircleOutlined, ToolOutlined
+} from '@ant-design/icons';
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
+const { Panel } = Collapse;
 
 // ═══ 自定义主题 ═══
 const darkTheme = {
@@ -34,26 +39,124 @@ async function sendMessageAPI(message, history) {
     body: JSON.stringify({ message, history }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.body.getReader();
+}
 
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '', aiMessage = '';
+// ═══ Agent 步骤组件 ═══
+function AgentStep({ step }) {
+  const { type, content, tool, input, step: stepNum } = step;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      try {
-        const data = JSON.parse(line.slice(6));
-        if (data.type === 'message') aiMessage += data.content;
-      } catch {}
+  const getIcon = () => {
+    switch (type) {
+      case 'thought': return <BulbOutlined style={{ color: '#7c9fd4' }} />;
+      case 'action': return <ToolOutlined style={{ color: '#c9a96e' }} />;
+      case 'observation': return <EyeOutlined style={{ color: '#6bc77b' }} />;
+      case 'finish': return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+      case 'error': return <ThunderboltOutlined style={{ color: '#ff4d4f' }} />;
+      default: return <LoadingOutlined />;
     }
-  }
-  return aiMessage;
+  };
+
+  const getLabel = () => {
+    switch (type) {
+      case 'thought': return '思考';
+      case 'action': return '执行';
+      case 'observation': return '观察';
+      case 'finish': return '完成';
+      case 'error': return '错误';
+      default: return '处理中';
+    }
+  };
+
+  const getColor = () => {
+    switch (type) {
+      case 'thought': return '#7c9fd4';
+      case 'action': return '#c9a96e';
+      case 'observation': return '#6bc77b';
+      case 'finish': return '#52c41a';
+      case 'error': return '#ff4d4f';
+      default: return '#888';
+    }
+  };
+
+  return (
+    <div style={{
+      background: '#141414',
+      border: `1px solid ${getColor()}30`,
+      borderRadius: 8,
+      marginBottom: 8,
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 12px',
+        background: `${getColor()}10`,
+        borderBottom: `1px solid ${getColor()}20`,
+      }}>
+        {getIcon()}
+        <Text style={{ fontSize: 12, color: getColor(), fontWeight: 600 }}>
+          {getLabel()} · 步骤 {stepNum}
+        </Text>
+        {tool && (
+          <Tag color="gold" style={{ fontSize: 10, marginLeft: 'auto' }}>
+            {tool}
+          </Tag>
+        )}
+      </div>
+      <div style={{ padding: '8px 12px', fontSize: 13, lineHeight: 1.6 }}>
+        {type === 'action' ? (
+          <div>
+            <Text style={{ color: '#888', fontSize: 11 }}>输入参数:</Text>
+            <pre style={{ 
+              margin: '4px 0 0', 
+              padding: 8, 
+              background: '#0a0a0a', 
+              borderRadius: 4,
+              fontSize: 12,
+              color: '#e0e0e0',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}>
+              {input}
+            </pre>
+          </div>
+        ) : type === 'observation' ? (
+          <Collapse 
+            ghost 
+            size="small"
+            style={{ background: 'transparent' }}
+          >
+            <Panel 
+              header={<Text style={{ fontSize: 12, color: '#888' }}>查看工具返回结果</Text>}
+              key="1"
+              style={{ border: 'none', padding: 0 }}
+            >
+              <pre style={{ 
+                margin: 0, 
+                padding: 8, 
+                background: '#0a0a0a', 
+                borderRadius: 4,
+                fontSize: 11,
+                color: '#6bc77b',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                maxHeight: 200,
+                overflow: 'auto',
+              }}>
+                {content}
+              </pre>
+            </Panel>
+          </Collapse>
+        ) : (
+          <Paragraph style={{ margin: 0, color: '#e0e0e0', whiteSpace: 'pre-wrap' }}>
+            {content}
+          </Paragraph>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ═══ 角色配置 ═══
@@ -93,11 +196,6 @@ const roles = {
         color: '#c9a96e',
       },
     },
-    loadingRender: () => (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#888' }}>
-        <LoadingOutlined /> 思考中...
-      </div>
-    ),
   },
 };
 
@@ -106,6 +204,7 @@ function ChatDemo() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [agentSteps, setAgentSteps] = useState([]);
   const abortRef = useRef(null);
   const bubbleListRef = useRef(null);
 
@@ -113,27 +212,60 @@ function ChatDemo() {
     if (!message.trim() || loading) return;
 
     const userMsg = { key: `u-${Date.now()}`, role: 'user', content: message };
-    const aiMsg = { key: `a-${Date.now()}`, role: 'ai', content: '', loading: true };
-
-    setMessages(prev => [...prev, userMsg, aiMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setLoading(true);
+    setAgentSteps([]);
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
-      const history = [...messages, userMsg].map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content }));
-      const result = await sendMessageAPI(message, history);
+      const history = messages.map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content }));
+      const reader = await sendMessageAPI(message, history);
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalAnswer = '';
+      let currentSteps = [];
 
-      setMessages(prev => prev.map(m =>
-        m.key === aiMsg.key ? { ...m, content: result, loading: false } : m
-      ));
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            
+            if (data.type === 'thought' || data.type === 'action' || 
+                data.type === 'observation' || data.type === 'finish' || 
+                data.type === 'error') {
+              currentSteps.push(data);
+              setAgentSteps([...currentSteps]);
+            }
+            
+            if (data.type === 'finish') {
+              finalAnswer = data.content;
+            } else if (data.type === 'message') {
+              finalAnswer = data.content;
+            }
+          } catch {}
+        }
+      }
+
+      // 添加 AI 回复
+      if (finalAnswer) {
+        const aiMsg = { key: `a-${Date.now()}`, role: 'ai', content: finalAnswer };
+        setMessages(prev => [...prev, aiMsg]);
+      }
     } catch (e) {
       if (e.name !== 'AbortError') {
-        setMessages(prev => prev.map(m =>
-          m.key === aiMsg.key ? { ...m, content: `⚠️ ${e.message}`, loading: false } : m
-        ));
+        const errorMsg = { key: `e-${Date.now()}`, role: 'ai', content: `⚠️ ${e.message}` };
+        setMessages(prev => [...prev, errorMsg]);
       }
     } finally {
       setLoading(false);
@@ -144,9 +276,6 @@ function ChatDemo() {
   const handleAbort = useCallback(() => {
     abortRef.current?.abort();
     setLoading(false);
-    setMessages(prev => prev.map(m =>
-      m.loading ? { ...m, content: '已取消', loading: false } : m
-    ));
   }, []);
 
   const quickPrompts = [
@@ -160,7 +289,7 @@ function ChatDemo() {
     <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', borderRadius: 8, overflow: 'hidden' }}>
       {/* 聊天头部 */}
       <div style={{ padding: '10px 14px', borderBottom: '1px solid #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 12, color: '#c9a96e', margin: 0 }}>JD Copilot · Ant Design X</Text>
+        <Text style={{ fontSize: 12, color: '#c9a96e', margin: 0 }}>JD Copilot · ReAct Agent</Text>
         <Tag color="green" style={{ fontSize: 9 }}>● 就绪</Tag>
       </div>
 
@@ -190,15 +319,26 @@ function ChatDemo() {
         </div>
       )}
 
-      {/* 消息列表 - 使用 Bubble.List */}
-      <div style={{ padding: 14, minHeight: 300, maxHeight: 420, overflow: 'auto' }}>
+      {/* Agent 执行步骤 */}
+      {agentSteps.length > 0 && (
+        <div style={{ padding: '12px 14px', borderBottom: '1px solid #1a1a1a' }}>
+          <Text style={{ fontSize: 11, color: '#888', marginBottom: 8, display: 'block' }}>
+            <BulbOutlined /> Agent 执行过程 (ReAct 范式)
+          </Text>
+          {agentSteps.map((step, idx) => (
+            <AgentStep key={idx} step={step} />
+          ))}
+        </div>
+      )}
+
+      {/* 消息列表 */}
+      <div style={{ padding: 14, minHeight: 200, maxHeight: 300, overflow: 'auto' }}>
         <Bubble.List
           ref={bubbleListRef}
           items={messages.map(m => ({
             key: m.key,
             role: m.role,
             content: m.content,
-            loading: m.loading,
           }))}
           role={roles}
           autoScroll={true}
@@ -206,7 +346,7 @@ function ChatDemo() {
         />
       </div>
 
-      {/* 输入框 - 使用 Sender */}
+      {/* 输入框 */}
       <div style={{ padding: '10px 14px', borderTop: '1px solid #1a1a1a' }}>
         <Sender
           value={inputValue}

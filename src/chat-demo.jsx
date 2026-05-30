@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider, theme, Tag, Typography, Input, Button, Space } from 'antd';
-import { Sender, Prompts, Welcome } from '@ant-design/x';
-import { RobotOutlined, UserOutlined, SendOutlined, LoadingOutlined } from '@ant-design/icons';
+import { ConfigProvider, theme, Tag, Typography } from 'antd';
+import { Bubble, Sender, Prompts, Welcome } from '@ant-design/x';
+import { RobotOutlined, UserOutlined, LoadingOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -56,57 +56,50 @@ async function sendMessageAPI(message, history) {
   return aiMessage;
 }
 
-// ═══ 消息气泡组件 ═══
-function MessageBubble({ role, content, loading }) {
-  const isUser = role === 'user';
-  return (
-    <div style={{
-      display: 'flex',
-      justifyContent: isUser ? 'flex-end' : 'flex-start',
-      marginBottom: 12,
-    }}>
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        flexDirection: isUser ? 'row-reverse' : 'row',
-        maxWidth: '80%',
-      }}>
-        <div style={{
-          width: 28,
-          height: 28,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: isUser ? 'rgba(124,159,212,0.15)' : 'rgba(201,169,110,0.1)',
-          color: isUser ? '#7c9fd4' : '#c9a96e',
-          fontSize: 12,
-          flexShrink: 0,
-        }}>
-          {isUser ? <UserOutlined /> : <RobotOutlined />}
-        </div>
-        <div style={{
-          background: isUser ? 'rgba(124,159,212,0.1)' : '#141414',
-          border: '1px solid #1a1a1a',
-          borderRadius: 8,
-          padding: '8px 12px',
-          fontSize: 13,
-          lineHeight: 1.6,
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-        }}>
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#888' }}>
-              <LoadingOutlined /> 思考中...
-            </div>
-          ) : (
-            content
-          )}
-        </div>
+// ═══ 角色配置 ═══
+const roles = {
+  user: {
+    placement: 'end',
+    variant: 'filled',
+    styles: {
+      content: {
+        background: 'rgba(124,159,212,0.1)',
+        border: '1px solid rgba(124,159,212,0.2)',
+        color: '#e0e0e0',
+      },
+    },
+    avatar: {
+      icon: <UserOutlined />,
+      style: {
+        background: 'rgba(124,159,212,0.15)',
+        color: '#7c9fd4',
+      },
+    },
+  },
+  ai: {
+    placement: 'start',
+    variant: 'filled',
+    styles: {
+      content: {
+        background: '#141414',
+        border: '1px solid #1a1a1a',
+        color: '#e0e0e0',
+      },
+    },
+    avatar: {
+      icon: <RobotOutlined />,
+      style: {
+        background: 'rgba(201,169,110,0.1)',
+        color: '#c9a96e',
+      },
+    },
+    loadingRender: () => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#888' }}>
+        <LoadingOutlined /> 思考中...
       </div>
-    </div>
-  );
-}
+    ),
+  },
+};
 
 // ═══ 聊天组件 ═══
 function ChatDemo() {
@@ -114,18 +107,13 @@ function ChatDemo() {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const abortRef = useRef(null);
-  const messagesEndRef = useRef(null);
-
-  // 自动滚动到底部
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const bubbleListRef = useRef(null);
 
   const handleSend = useCallback(async (message) => {
     if (!message.trim() || loading) return;
 
-    const userMsg = { id: `u-${Date.now()}`, role: 'user', content: message };
-    const aiMsg = { id: `a-${Date.now()}`, role: 'assistant', content: '', loading: true };
+    const userMsg = { key: `u-${Date.now()}`, role: 'user', content: message };
+    const aiMsg = { key: `a-${Date.now()}`, role: 'ai', content: '', loading: true };
 
     setMessages(prev => [...prev, userMsg, aiMsg]);
     setInputValue('');
@@ -135,16 +123,16 @@ function ChatDemo() {
     abortRef.current = controller;
 
     try {
-      const history = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
+      const history = [...messages, userMsg].map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content }));
       const result = await sendMessageAPI(message, history);
 
       setMessages(prev => prev.map(m =>
-        m.id === aiMsg.id ? { ...m, content: result, loading: false } : m
+        m.key === aiMsg.key ? { ...m, content: result, loading: false } : m
       ));
     } catch (e) {
       if (e.name !== 'AbortError') {
         setMessages(prev => prev.map(m =>
-          m.id === aiMsg.id ? { ...m, content: `⚠️ ${e.message}`, loading: false } : m
+          m.key === aiMsg.key ? { ...m, content: `⚠️ ${e.message}`, loading: false } : m
         ));
       }
     } finally {
@@ -202,33 +190,33 @@ function ChatDemo() {
         </div>
       )}
 
-      {/* 消息列表 */}
+      {/* 消息列表 - 使用 Bubble.List */}
       <div style={{ padding: 14, minHeight: 300, maxHeight: 420, overflow: 'auto' }}>
-        {messages.map(m => (
-          <MessageBubble key={m.id} role={m.role} content={m.content} loading={m.loading} />
-        ))}
-        <div ref={messagesEndRef} />
+        <Bubble.List
+          ref={bubbleListRef}
+          items={messages.map(m => ({
+            key: m.key,
+            role: m.role,
+            content: m.content,
+            loading: m.loading,
+          }))}
+          role={roles}
+          autoScroll={true}
+          style={{ background: 'transparent' }}
+        />
       </div>
 
-      {/* 输入框 */}
+      {/* 输入框 - 使用 Sender */}
       <div style={{ padding: '10px 14px', borderTop: '1px solid #1a1a1a' }}>
-        <Space.Compact style={{ width: '100%' }}>
-          <Input
-            placeholder="输入岗位名称，或粘贴会议记录..."
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onPressEnter={() => handleSend(inputValue)}
-            disabled={loading}
-            style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}
-          />
-          {loading ? (
-            <Button onClick={handleAbort} style={{ background: '#1a1a1a', border: '1px solid #1a1a1a' }}>
-              取消
-            </Button>
-          ) : (
-            <Button type="primary" icon={<SendOutlined />} onClick={() => handleSend(inputValue)} />
-          )}
-        </Space.Compact>
+        <Sender
+          value={inputValue}
+          onChange={setInputValue}
+          onSubmit={handleSend}
+          onCancel={handleAbort}
+          loading={loading}
+          placeholder="输入岗位名称，或粘贴会议记录..."
+          style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: 8 }}
+        />
       </div>
     </div>
   );

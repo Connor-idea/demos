@@ -146,24 +146,24 @@ function ChatDemo() {
         </div>
       )}
 
-      {/* 气泡列表 - 使用正确的 Bubble.List 格式 */}
+      {/* 气泡列表 - 使用单个 Bubble 组件 */}
       <div style={{ padding: 14, minHeight: 300, maxHeight: 420, overflow: 'auto' }}>
-        <Bubble.List
-          items={messages.map(m => ({
-            key: m.id,
-            role: m.role,
-            content: m.content || '',
-            loading: m.loading || false,
-            avatar: {
+        {messages.map(m => (
+          <Bubble
+            key={m.id}
+            placement={m.role === 'user' ? 'end' : 'start'}
+            content={m.content || ''}
+            loading={m.loading || false}
+            avatar={{
               icon: m.role === 'user' ? <UserOutlined /> : <RobotOutlined />,
               style: {
                 background: m.role === 'user' ? 'rgba(124,159,212,0.15)' : 'rgba(201,169,110,0.1)',
                 color: m.role === 'user' ? '#7c9fd4' : '#c9a96e',
               },
-            },
-          }))}
-          style={{ background: 'transparent' }}
-        />
+            }}
+            style={{ marginBottom: 8 }}
+          />
+        ))}
       </div>
 
       {/* Sender 输入框 */}

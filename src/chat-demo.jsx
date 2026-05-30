@@ -146,18 +146,14 @@ function ChatDemo() {
         </div>
       )}
 
-      {/* 气泡列表 */}
+      {/* 气泡列表 - 使用正确的 Bubble.List 格式 */}
       <div style={{ padding: 14, minHeight: 300, maxHeight: 420, overflow: 'auto' }}>
         <Bubble.List
-          role={{
-            user: { placement: 'end' },
-            assistant: { placement: 'start' },
-          }}
           items={messages.map(m => ({
             key: m.id,
             role: m.role,
-            content: m.content,
-            loading: m.loading,
+            content: m.content || '',
+            loading: m.loading || false,
             avatar: {
               icon: m.role === 'user' ? <UserOutlined /> : <RobotOutlined />,
               style: {

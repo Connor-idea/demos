@@ -1,0 +1,31 @@
+[
+  {
+    "id": "g1-simple-tech",
+    "name": "简单技术岗",
+    "input": "前端工程师",
+    "expected": {
+      "contains": ["技术栈", "经验要求"],
+      "max_rounds": 2
+    }
+  },
+  {
+    "id": "g2-meeting-notes",
+    "name": "会议记录解析",
+    "input": "今天和产品部老王聊了一下，他说他们急需一个前端工程师。技术栈是React和TypeScript。",
+    "expected": {
+      "extracted": {
+        "技术栈": "React"
+      },
+      "max_rounds": 1
+    }
+  },
+  {
+    "id": "g3-non-tech",
+    "name": "非技术岗",
+    "input": "产品经理",
+    "expected": {
+      "contains": ["行业经验"],
+      "not_contains": ["技术栈"]
+    }
+  }
+]

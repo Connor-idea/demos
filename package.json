@@ -1,23 +1,20 @@
 {
   "name": "hr-agent-demo",
+  "version": "2.0.0",
   "private": true,
-  "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.6.1",
-    "@ant-design/x": "^2.5.0",
-    "@ant-design/x-sdk": "^2.7.0",
+    "@ant-design/cssinjs": "^2.1.2",
+    "@ant-design/icons": "^6.2.5",
+    "@ant-design/x": "^2.7.0",
     "antd": "^6.4.3",
+    "antd-style": "^4.1.0",
+    "next": "14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.5.2",
-    "vite": "^5.4.19"
   }
 }
